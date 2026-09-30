@@ -1,0 +1,11 @@
+# Disable delta compression for large binary game assets to keep Git fast and prevent high RAM usage
+*.tga -delta
+*.png -delta
+*.jpg -delta
+*.exr -delta
+*.fbx -delta
+*.obj -delta
+*.wav -delta
+*.mp3 -delta
+*.ogg -delta
+*.mp4 -delta
