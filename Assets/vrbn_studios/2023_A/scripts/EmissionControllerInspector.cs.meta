@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 8a1074f68d1ca7f4a9784d91afd57295
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 264015
+  packageName: vrbn Studios Free Buildings URP Bundle 001
+  packageVersion: 1.0
+  assetPath: Assets/vrbn_studios/2023_A/scripts/EmissionControllerInspector.cs
+  uploadId: 617985
