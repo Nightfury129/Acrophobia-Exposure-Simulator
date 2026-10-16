@@ -80,14 +80,34 @@ second anchor, so even if the tag were deleted the commit stays reachable.
 
 ## If your local copy is wrecked beyond repair
 
-Checkpoints are pushed to the remote as well as kept locally, so you can always get a
-clean copy:
+Checkpoints are pushed as well as kept locally, so you can always get a clean copy.
+Clone the **fork** — that is where the checkpoints live:
 
 ```
-git clone https://github.com/Nightfury129/Acrophobia-Trainer.git
+git clone https://github.com/gandhialt/Acrophobia-Trainer.git
 cd Acrophobia-Trainer
 git switch --detach checkpoint-00-baseline
 ```
+
+## Remotes
+
+```
+fork    gandhialt/Acrophobia-Trainer      writable  <- all work goes here
+origin  Nightfury129/Acrophobia-Trainer   read-only <- upstream, owned by someone else
+```
+
+`main` tracks `fork/main`, so a bare `git push` goes to the fork. Origin's *push* URL is
+deliberately set to a placeholder, because `gandhialt` is not a collaborator on it and
+attempting to push triggers an endless Git Credential Manager login loop — GCM misreads
+the permission error as a stale token and re-authenticates forever. Re-enable it only
+once collaborator access is actually granted:
+
+```
+git remote set-url --push origin https://github.com/Nightfury129/Acrophobia-Trainer.git
+```
+
+Getting work into the upstream repo requires either that collaborator access or a pull
+request from the fork. Forks cannot push upstream.
 
 ## Known noise in `git status`
 
