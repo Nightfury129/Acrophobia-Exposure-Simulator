@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Acrophobia.AdaptiveFSM;
+using Acrophobia.Locomotion;
 using Acrophobia.Telemetry;
 
 namespace Acrophobia.Narration
@@ -65,6 +66,10 @@ namespace Acrophobia.Narration
             public GameObject Prop;
 
             public bool PropActive = true;
+
+            [Tooltip("Hold the participant still for this beat. Teleport is disabled; " +
+                     "they can still look around, and the session controls stay live.")]
+            public bool LockMovement = false;
         }
 
         [Serializable]
@@ -89,6 +94,7 @@ namespace Acrophobia.Narration
         [SerializeField] private Transform _centerEyeAnchor;
         [SerializeField] private AdaptiveExposureFSM _fsm;
         [SerializeField] private SessionTelemetryLogger _logger;
+        [SerializeField] private TeleportLocomotion _teleport;
 
         private Coroutine _running;
         private int _runningTier = -1;
@@ -125,6 +131,7 @@ namespace Acrophobia.Narration
         public void ResolveReferences()
         {
             if (_fsm == null) _fsm = FindAnyObjectByType<AdaptiveExposureFSM>();
+            if (_teleport == null) _teleport = FindAnyObjectByType<TeleportLocomotion>();
             if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
             if (_subtitles == null) _subtitles = FindAnyObjectByType<NarratorSubtitleView>();
 
@@ -171,6 +178,10 @@ namespace Acrophobia.Narration
 
             _subtitles?.Hide();
             _fader?.SetAlphaImmediate(0f);
+
+            // A skip can land mid-locked-beat, so movement is restored unconditionally.
+            if (_teleport != null) _teleport.enabled = true;
+
             _logger?.RecordEvent("ritual_skipped", _runningTier, "participant_or_system", 0f);
             _runningTier = -1;
         }
@@ -219,6 +230,18 @@ namespace Acrophobia.Narration
         private IEnumerator RunBeat(Beat beat)
         {
             if (beat == null) yield break;
+
+            // Movement lock is scoped to the beat and restored in every exit path,
+            // including a skip, so a participant can never be left unable to move.
+            // Only deliberate travel is withheld: looking around still works, and the
+            // step-back and end-session controls stay live throughout, which the brief
+            // requires unconditionally.
+            bool lockedHere = beat.LockMovement && _teleport != null && _teleport.enabled;
+            if (lockedHere)
+            {
+                _teleport.enabled = false;
+                _logger?.RecordEvent("movement_locked", _runningTier, "ritual_beat", 0f);
+            }
 
             switch (beat.Kind)
             {
@@ -278,6 +301,12 @@ namespace Acrophobia.Narration
                 case BeatKind.Pause:
                     yield return new WaitForSeconds(Mathf.Max(0.1f, beat.Seconds));
                     break;
+            }
+
+            if (lockedHere)
+            {
+                _teleport.enabled = true;
+                _logger?.RecordEvent("movement_unlocked", _runningTier, "ritual_beat", 0f);
             }
         }
 

@@ -15,3 +15,6 @@
 # Poly Haven source textures are small (~15 MB total) and do not need LFS.
 # GitHub refuses new LFS objects on a public fork, so these are plain blobs.
 Assets/Textures/** !filter !diff !merge
+
+# Ritual audio: ~25 MB total, and GitHub refuses new LFS objects on a public fork.
+Assets/Audio/** !filter !diff !merge
