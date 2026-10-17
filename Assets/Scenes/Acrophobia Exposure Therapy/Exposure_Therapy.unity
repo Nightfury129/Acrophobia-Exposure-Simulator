@@ -957,6 +957,8 @@ MonoBehaviour:
   _bodyRadius: 0.22
   _enableBodyAntiClip: 1
   _enableEdgeContainment: 1
+  _framesBeforeContainment: 5
+  _maxContainmentCorrection: 0.08
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -9544,6 +9546,7 @@ GameObject:
   - component: {fileID: 1222598479}
   - component: {fileID: 1222598478}
   - component: {fileID: 1222598477}
+  - component: {fileID: 1222598480}
   m_Layer: 0
   m_Name: '[Session_Controller]'
   m_TagString: Untagged
@@ -9628,6 +9631,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1222598480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222598476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffec02544ebccce4aa75298f13de41a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.ExposureHeightController
+  _tierHeights:
+  - 3
+  - 12
+  - 30
+  - 60
+  - 104
+  _authoredHeight: 104.17
+  _platformRoot: {fileID: 361578784}
+  _playerRig: {fileID: 83859212}
+  _fsm: {fileID: 1222598477}
+  _teleport: {fileID: 83859215}
+  _logger: {fileID: 1700667860}
+  _applyOnStart: 1
 --- !u!1001 &1229544927
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13601,6 +13629,8 @@ MonoBehaviour:
   _retreatWindowSeconds: 3
   _cooldownSeconds: 2
   _maxMeaningfulDistance: 4
+  _minHeadDisplacementMetres: 0.15
+  _headTransform: {fileID: 0}
   _edgeTracker: {fileID: 0}
   _logger: {fileID: 0}
 --- !u!114 &1700667859

@@ -205,6 +205,35 @@ namespace Acrophobia.Locomotion
             _hasValidTarget = true;
         }
 
+        /// <summary>
+        /// Runs an action at the midpoint of a comfort blink, so another system can
+        /// reposition the participant with no optical flow. The height hierarchy uses
+        /// this: a 90 metre vertical jump applied in the open would read as a drop,
+        /// which the brief forbids, but behind a blink there is nothing to perceive.
+        /// </summary>
+        public void BlinkAction(Action midpoint)
+        {
+            if (_isTeleporting)
+            {
+                // Already mid-blink: apply immediately rather than queueing a second fade.
+                midpoint?.Invoke();
+                return;
+            }
+
+            StartCoroutine(BlinkRoutine(midpoint));
+        }
+
+        private System.Collections.IEnumerator BlinkRoutine(Action midpoint)
+        {
+            _isTeleporting = true;
+
+            yield return FadeTo(1f);
+            midpoint?.Invoke();
+            yield return FadeTo(0f);
+
+            _isTeleporting = false;
+        }
+
         private System.Collections.IEnumerator TeleportWithBlink(Vector3 destination)
         {
             _isTeleporting = true;
