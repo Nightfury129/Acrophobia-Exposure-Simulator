@@ -256,6 +256,7 @@ GameObject:
   - component: {fileID: 18256683}
   - component: {fileID: 18256682}
   - component: {fileID: 18256681}
+  - component: {fileID: 18256684}
   m_Layer: 0
   m_Name: Rug
   m_TagString: Untagged
@@ -303,7 +304,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -356,6 +357,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18256679}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &18256684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 18256679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &24380070
 GameObject:
   m_ObjectHideFlags: 0
@@ -1285,6 +1301,7 @@ GameObject:
   - component: {fileID: 127111302}
   - component: {fileID: 127111301}
   - component: {fileID: 127111300}
+  - component: {fileID: 127111303}
   m_Layer: 0
   m_Name: Step_3
   m_TagString: Untagged
@@ -1332,7 +1349,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: e21226cef5923d64cb6637f6ccd1aea0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1385,6 +1402,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127111298}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &127111303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127111298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &130049303
 GameObject:
   m_ObjectHideFlags: 0
@@ -1490,6 +1522,7 @@ GameObject:
   - component: {fileID: 130141437}
   - component: {fileID: 130141436}
   - component: {fileID: 130141435}
+  - component: {fileID: 130141438}
   m_Layer: 0
   m_Name: Step_2
   m_TagString: Untagged
@@ -1537,7 +1570,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: e21226cef5923d64cb6637f6ccd1aea0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1590,6 +1623,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 130141433}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &130141438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130141433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &133069565
 GameObject:
   m_ObjectHideFlags: 0
@@ -1855,6 +1903,7 @@ GameObject:
   - component: {fileID: 157185038}
   - component: {fileID: 157185037}
   - component: {fileID: 157185036}
+  - component: {fileID: 157185039}
   m_Layer: 0
   m_Name: Handrail_Post
   m_TagString: Untagged
@@ -1902,7 +1951,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1955,6 +2004,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 157185034}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &157185039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157185034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1001 &158338258
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2142,6 +2206,7 @@ GameObject:
   - component: {fileID: 180338165}
   - component: {fileID: 180338164}
   - component: {fileID: 180338163}
+  - component: {fileID: 180338166}
   m_Layer: 0
   m_Name: Chair_Back
   m_TagString: Untagged
@@ -2189,7 +2254,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2242,6 +2307,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180338161}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &180338166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180338161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &183512102
 GameObject:
   m_ObjectHideFlags: 0
@@ -2711,6 +2791,7 @@ GameObject:
   - component: {fileID: 286032758}
   - component: {fileID: 286032757}
   - component: {fileID: 286032756}
+  - component: {fileID: 286032759}
   m_Layer: 0
   m_Name: Wall_Bal_Lintel
   m_TagString: Untagged
@@ -2758,7 +2839,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2811,6 +2892,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 286032754}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &286032759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286032754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &288785254
 GameObject:
   m_ObjectHideFlags: 0
@@ -4164,6 +4260,7 @@ GameObject:
   - component: {fileID: 443201918}
   - component: {fileID: 443201917}
   - component: {fileID: 443201916}
+  - component: {fileID: 443201919}
   m_Layer: 0
   m_Name: Wall_Left
   m_TagString: Untagged
@@ -4211,7 +4308,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4264,6 +4361,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 443201914}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &443201919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 443201914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &451085822
 GameObject:
   m_ObjectHideFlags: 0
@@ -4850,6 +4962,7 @@ GameObject:
   - component: {fileID: 518999578}
   - component: {fileID: 518999577}
   - component: {fileID: 518999576}
+  - component: {fileID: 518999579}
   m_Layer: 0
   m_Name: Chair_Seat
   m_TagString: Untagged
@@ -4897,7 +5010,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4950,6 +5063,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 518999574}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &518999579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 518999574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &520978726
 GameObject:
   m_ObjectHideFlags: 0
@@ -5723,6 +5851,7 @@ GameObject:
   - component: {fileID: 642445655}
   - component: {fileID: 642445654}
   - component: {fileID: 642445653}
+  - component: {fileID: 642445656}
   m_Layer: 0
   m_Name: Wall_Win_Header
   m_TagString: Untagged
@@ -5770,7 +5899,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5823,6 +5952,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 642445651}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &642445656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 642445651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &644709153
 GameObject:
   m_ObjectHideFlags: 0
@@ -6165,6 +6309,7 @@ GameObject:
   - component: {fileID: 700976743}
   - component: {fileID: 700976742}
   - component: {fileID: 700976741}
+  - component: {fileID: 700976744}
   m_Layer: 0
   m_Name: Desk_LegR
   m_TagString: Untagged
@@ -6212,7 +6357,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6265,6 +6410,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 700976739}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &700976744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 700976739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &703950836
 GameObject:
   m_ObjectHideFlags: 0
@@ -6753,6 +6913,7 @@ GameObject:
   - component: {fileID: 743231030}
   - component: {fileID: 743231029}
   - component: {fileID: 743231028}
+  - component: {fileID: 743231031}
   m_Layer: 0
   m_Name: Unit
   m_TagString: Untagged
@@ -6800,7 +6961,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6853,6 +7014,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 743231026}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &743231031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 743231026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &746602888
 GameObject:
   m_ObjectHideFlags: 0
@@ -7454,6 +7630,7 @@ GameObject:
   - component: {fileID: 791839083}
   - component: {fileID: 791839082}
   - component: {fileID: 791839081}
+  - component: {fileID: 791839084}
   m_Layer: 0
   m_Name: Monitor
   m_TagString: Untagged
@@ -7501,7 +7678,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7554,6 +7731,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 791839079}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &791839084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 791839079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &809579548
 GameObject:
   m_ObjectHideFlags: 0
@@ -8397,6 +8589,7 @@ GameObject:
   - component: {fileID: 888411674}
   - component: {fileID: 888411673}
   - component: {fileID: 888411672}
+  - component: {fileID: 888411675}
   m_Layer: 0
   m_Name: Duct_Branch
   m_TagString: Untagged
@@ -8444,7 +8637,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8497,6 +8690,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 888411670}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &888411675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888411670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &890434517
 GameObject:
   m_ObjectHideFlags: 0
@@ -8659,6 +8867,7 @@ GameObject:
   - component: {fileID: 895919771}
   - component: {fileID: 895919770}
   - component: {fileID: 895919769}
+  - component: {fileID: 895919772}
   m_Layer: 0
   m_Name: Fuse_Box
   m_TagString: Untagged
@@ -8706,7 +8915,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8759,6 +8968,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 895919767}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &895919772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 895919767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &898882392
 GameObject:
   m_ObjectHideFlags: 0
@@ -8833,6 +9057,7 @@ GameObject:
   - component: {fileID: 911477042}
   - component: {fileID: 911477041}
   - component: {fileID: 911477040}
+  - component: {fileID: 911477043}
   m_Layer: 0
   m_Name: Handrail
   m_TagString: Untagged
@@ -8880,7 +9105,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -8933,6 +9158,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 911477038}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &911477043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 911477038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &913275892
 GameObject:
   m_ObjectHideFlags: 0
@@ -9092,6 +9332,7 @@ GameObject:
   - component: {fileID: 926404277}
   - component: {fileID: 926404276}
   - component: {fileID: 926404275}
+  - component: {fileID: 926404278}
   m_Layer: 0
   m_Name: Wall_Right
   m_TagString: Untagged
@@ -9139,7 +9380,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9192,6 +9433,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 926404273}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &926404278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 926404273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &931036994
 GameObject:
   m_ObjectHideFlags: 0
@@ -9633,6 +9889,7 @@ GameObject:
   - component: {fileID: 982779055}
   - component: {fileID: 982779054}
   - component: {fileID: 982779053}
+  - component: {fileID: 982779056}
   m_Layer: 0
   m_Name: Desk
   m_TagString: Untagged
@@ -9680,7 +9937,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9733,6 +9990,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 982779051}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &982779056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 982779051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &987070810
 GameObject:
   m_ObjectHideFlags: 0
@@ -10108,6 +10380,7 @@ GameObject:
   - component: {fileID: 1020744623}
   - component: {fileID: 1020744622}
   - component: {fileID: 1020744621}
+  - component: {fileID: 1020744624}
   m_Layer: 0
   m_Name: Door_Panel
   m_TagString: Untagged
@@ -10155,7 +10428,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10208,6 +10481,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1020744619}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1020744624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020744619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1035013276
 GameObject:
   m_ObjectHideFlags: 0
@@ -10526,6 +10814,7 @@ GameObject:
   - component: {fileID: 1078515352}
   - component: {fileID: 1078515351}
   - component: {fileID: 1078515350}
+  - component: {fileID: 1078515353}
   m_Layer: 0
   m_Name: Cabinet
   m_TagString: Untagged
@@ -10573,7 +10862,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10626,6 +10915,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1078515348}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1078515353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1078515348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1001 &1089467881
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10972,6 +11276,7 @@ GameObject:
   - component: {fileID: 1123934640}
   - component: {fileID: 1123934639}
   - component: {fileID: 1123934638}
+  - component: {fileID: 1123934641}
   m_Layer: 0
   m_Name: Wall_Win_Pier
   m_TagString: Untagged
@@ -11019,7 +11324,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11072,6 +11377,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1123934636}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1123934641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1123934636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1127171486
 GameObject:
   m_ObjectHideFlags: 0
@@ -12864,6 +13184,7 @@ GameObject:
   - component: {fileID: 1299854956}
   - component: {fileID: 1299854955}
   - component: {fileID: 1299854954}
+  - component: {fileID: 1299854957}
   m_Layer: 0
   m_Name: Headboard
   m_TagString: Untagged
@@ -12911,7 +13232,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -12964,6 +13285,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1299854952}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1299854957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299854952}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1001 &1304008508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14532,6 +14868,7 @@ GameObject:
   - component: {fileID: 1407995936}
   - component: {fileID: 1407995935}
   - component: {fileID: 1407995934}
+  - component: {fileID: 1407995937}
   m_Layer: 0
   m_Name: Duct_Main
   m_TagString: Untagged
@@ -14579,7 +14916,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -14632,6 +14969,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1407995932}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1407995937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1407995932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1423269441
 GameObject:
   m_ObjectHideFlags: 0
@@ -14962,6 +15314,7 @@ GameObject:
   - component: {fileID: 1473368628}
   - component: {fileID: 1473368627}
   - component: {fileID: 1473368626}
+  - component: {fileID: 1473368629}
   m_Layer: 0
   m_Name: Bed
   m_TagString: Untagged
@@ -15009,7 +15362,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -15062,6 +15415,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1473368624}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1473368629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473368624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1478973848
 GameObject:
   m_ObjectHideFlags: 0
@@ -16174,6 +16542,7 @@ GameObject:
   - component: {fileID: 1592749730}
   - component: {fileID: 1592749729}
   - component: {fileID: 1592749728}
+  - component: {fileID: 1592749731}
   m_Layer: 0
   m_Name: Desk_LegL
   m_TagString: Untagged
@@ -16221,7 +16590,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16274,6 +16643,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1592749726}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1592749731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1592749726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1596272091
 GameObject:
   m_ObjectHideFlags: 0
@@ -16317,6 +16701,7 @@ GameObject:
   - component: {fileID: 1614624877}
   - component: {fileID: 1614624876}
   - component: {fileID: 1614624875}
+  - component: {fileID: 1614624878}
   m_Layer: 0
   m_Name: Wall_Bal_L
   m_TagString: Untagged
@@ -16364,7 +16749,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16417,6 +16802,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1614624873}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1614624878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1614624873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1001 &1621361018
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16771,6 +17171,7 @@ GameObject:
   - component: {fileID: 1684432764}
   - component: {fileID: 1684432763}
   - component: {fileID: 1684432762}
+  - component: {fileID: 1684432765}
   m_Layer: 0
   m_Name: Wall_Win_Sill
   m_TagString: Untagged
@@ -16818,7 +17219,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16871,6 +17272,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1684432760}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1684432765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1684432760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1699768352
 GameObject:
   m_ObjectHideFlags: 0
@@ -17434,6 +17850,7 @@ GameObject:
   - component: {fileID: 1727999426}
   - component: {fileID: 1727999425}
   - component: {fileID: 1727999424}
+  - component: {fileID: 1727999427}
   m_Layer: 0
   m_Name: Ceiling
   m_TagString: Untagged
@@ -17481,7 +17898,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: c773b59ecea5ea040a8f50479d82e946, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -17534,6 +17951,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1727999422}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1727999427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1727999422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1741001238
 GameObject:
   m_ObjectHideFlags: 0
@@ -18025,6 +18457,7 @@ GameObject:
   - component: {fileID: 1757691508}
   - component: {fileID: 1757691507}
   - component: {fileID: 1757691506}
+  - component: {fileID: 1757691509}
   m_Layer: 0
   m_Name: SideTable
   m_TagString: Untagged
@@ -18072,7 +18505,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: dccddf448f3d41a40bffa678d8c42490, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -18125,6 +18558,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1757691504}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1757691509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757691504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.05
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1759489740
 GameObject:
   m_ObjectHideFlags: 0
@@ -18969,6 +19417,7 @@ GameObject:
   - component: {fileID: 1808690628}
   - component: {fileID: 1808690627}
   - component: {fileID: 1808690626}
+  - component: {fileID: 1808690629}
   m_Layer: 0
   m_Name: Pipe
   m_TagString: Untagged
@@ -19016,7 +19465,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d84628f27f4a2d2408611e5e0de672f2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -19069,6 +19518,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1808690624}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1808690629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1808690624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1810568213
 GameObject:
   m_ObjectHideFlags: 0
@@ -19819,6 +20283,7 @@ GameObject:
   - component: {fileID: 1865692570}
   - component: {fileID: 1865692569}
   - component: {fileID: 1865692568}
+  - component: {fileID: 1865692571}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -19866,7 +20331,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: d16fe5d5b161d8849b1eeb764e5a251b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -19919,6 +20384,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1865692566}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1865692571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865692566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 1.2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1871228502
 GameObject:
   m_ObjectHideFlags: 0
@@ -19931,6 +20411,7 @@ GameObject:
   - component: {fileID: 1871228506}
   - component: {fileID: 1871228505}
   - component: {fileID: 1871228504}
+  - component: {fileID: 1871228507}
   m_Layer: 0
   m_Name: Wall_Back
   m_TagString: Untagged
@@ -19978,7 +20459,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20031,6 +20512,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1871228502}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1871228507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871228502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1871413051
 GameObject:
   m_ObjectHideFlags: 0
@@ -20270,6 +20766,7 @@ GameObject:
   - component: {fileID: 1891825599}
   - component: {fileID: 1891825598}
   - component: {fileID: 1891825597}
+  - component: {fileID: 1891825600}
   m_Layer: 0
   m_Name: Crate_B
   m_TagString: Untagged
@@ -20317,7 +20814,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: e21226cef5923d64cb6637f6ccd1aea0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20370,6 +20867,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1891825595}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1891825600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891825595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1897765991
 GameObject:
   m_ObjectHideFlags: 0
@@ -20962,6 +21474,7 @@ GameObject:
   - component: {fileID: 1931739341}
   - component: {fileID: 1931739340}
   - component: {fileID: 1931739339}
+  - component: {fileID: 1931739342}
   m_Layer: 0
   m_Name: Wall_Win_JambR
   m_TagString: Untagged
@@ -21009,7 +21522,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: 803f2ef4e851fb0438f9a841baac8b03, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21062,6 +21575,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1931739337}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1931739342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931739337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2.23
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &1938095296
 GameObject:
   m_ObjectHideFlags: 0
@@ -22305,6 +22833,7 @@ GameObject:
   - component: {fileID: 2045598562}
   - component: {fileID: 2045598561}
   - component: {fileID: 2045598560}
+  - component: {fileID: 2045598563}
   m_Layer: 0
   m_Name: Crate_A
   m_TagString: Untagged
@@ -22352,7 +22881,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: e21226cef5923d64cb6637f6ccd1aea0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -22405,6 +22934,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2045598558}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2045598563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045598558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1001 &2054005840
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23117,6 +23661,7 @@ GameObject:
   - component: {fileID: 2110064179}
   - component: {fileID: 2110064178}
   - component: {fileID: 2110064177}
+  - component: {fileID: 2110064180}
   m_Layer: 0
   m_Name: Step_1
   m_TagString: Untagged
@@ -23164,7 +23709,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a4a1041ddc2629a43912b313c25b461f, type: 2}
+  - {fileID: 2100000, guid: e21226cef5923d64cb6637f6ccd1aea0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -23217,6 +23762,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110064175}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2110064180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2110064175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a923ca1bb19af24a8fadacb336436b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.WorldScaleTextureTiler
+  _texturePhysicalSize: 2
+  _densityMultiplier: 1
+  _continuousUpdate: 0
 --- !u!1 &2119743654
 GameObject:
   m_ObjectHideFlags: 0
