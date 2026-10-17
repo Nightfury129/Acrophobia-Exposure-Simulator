@@ -9547,6 +9547,7 @@ GameObject:
   - component: {fileID: 1222598478}
   - component: {fileID: 1222598477}
   - component: {fileID: 1222598480}
+  - component: {fileID: 1222598481}
   m_Layer: 0
   m_Name: '[Session_Controller]'
   m_TagString: Untagged
@@ -9656,6 +9657,25 @@ MonoBehaviour:
   _teleport: {fileID: 83859215}
   _logger: {fileID: 1700667860}
   _applyOnStart: 1
+--- !u!114 &1222598481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222598476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e77d2bf54214d44392ca7f7aabb349c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.AdaptiveFSM.SessionFlowController
+  _sudsDelayAfterTierChange: 4
+  _calibrateOnSessionStart: 1
+  _askBaselineSuds: 1
+  _fsm: {fileID: 1222598477}
+  _suds: {fileID: 1982310128}
+  _calibrator: {fileID: 1700667859}
+  _logger: {fileID: 1700667860}
 --- !u!1001 &1229544927
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -419,15 +419,19 @@ namespace Acrophobia.AdaptiveFSM
             }
             else
             {
-                // Completed Tier 5 - Session Finished!
-                _currentState = ExposureState.Completed;
+                // Reaching the top tier does NOT end the session. It used to set
+                // Completed, which made RequestStepBack return early - so the moment a
+                // participant reached tier 5 the step-back control went dead, leaving
+                // them stuck at 104 m with only "end session" available. That breaks the
+                // rule that step-back stays reachable at all times.
+                //
+                // Ending is the participant's decision, via RequestEndSession().
                 if (_hud != null)
                 {
-                    _hud.SetTier(5, "COMPLETE");
-                    _hud.SetInstruction("Session Complete! Outstanding physiological composure and courage demonstrated.");
-                    _hud.SetStatus(false, "STATUS: COMPLETE", ColorComplete);
+                    _hud.SetTier(5, TierNames[4]);
+                    _hud.SetInstruction("Highest level reached. Stay as long as you want, step back down, or end the session.");
+                    _hud.SetStatus(false, "STATUS: TOP LEVEL", ColorComplete);
                 }
-                OnSessionCompleted?.Invoke();
             }
         }
 
