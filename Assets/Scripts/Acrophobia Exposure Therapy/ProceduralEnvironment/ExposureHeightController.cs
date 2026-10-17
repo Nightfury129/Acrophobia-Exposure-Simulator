@@ -37,6 +37,12 @@ namespace Acrophobia.ProceduralEnvironment
         [Tooltip("Altitude the scene geometry was authored at. Offsets are measured from this.")]
         [SerializeField] private float _authoredHeight = 104.17f;
 
+        [Tooltip("The apartment interior. Hidden on the top tier, where there is no safe room.")]
+        [SerializeField] private Transform _apartmentRoot;
+
+        [Tooltip("Hide the apartment on the highest tier, leaving the open terrace.")]
+        [SerializeField] private bool _hideApartmentAtTopTier = true;
+
         [Tooltip("Root of the platform the participant stands on.")]
         [SerializeField] private Transform _platformRoot;
 
@@ -54,6 +60,8 @@ namespace Acrophobia.ProceduralEnvironment
         private Vector3 _rigOrigin;
         private bool _capturedOrigins;
         private int _appliedTier = -1;
+
+        private int TopTier => _tierHeights != null && _tierHeights.Length > 0 ? _tierHeights.Length : 5;
 
         /// <summary>
         /// Altitude in metres of the tier currently applied, or -1 before the first apply.
@@ -122,6 +130,11 @@ namespace Acrophobia.ProceduralEnvironment
             {
                 var found = GameObject.Find("Player_Rooftop_Environment");
                 if (found != null) _platformRoot = found.transform;
+            }
+
+            if (_apartmentRoot == null && _platformRoot != null)
+            {
+                _apartmentRoot = _platformRoot.Find("Apartment_Interior");
             }
         }
 
@@ -197,6 +210,19 @@ namespace Acrophobia.ProceduralEnvironment
                 Vector3 r = _rigOrigin;
                 r.y = _rigOrigin.y + offset;
                 _playerRig.position = r;
+            }
+
+            // Tiers 1-4 are balconies off the apartment, which is the constant safe base
+            // the participant can always retreat into. Tier 5 is the open terrace, where
+            // that safe box deliberately does not exist - the escalation is partly the
+            // absence of somewhere to go back to.
+            if (_apartmentRoot != null && _hideApartmentAtTopTier)
+            {
+                bool apartmentPresent = tier < TopTier;
+                if (_apartmentRoot.gameObject.activeSelf != apartmentPresent)
+                {
+                    _apartmentRoot.gameObject.SetActive(apartmentPresent);
+                }
             }
 
             _appliedTier = tier;
