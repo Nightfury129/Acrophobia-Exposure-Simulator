@@ -101,8 +101,10 @@ namespace Acrophobia.AdaptiveFSM
 
         // Events
         public event Action<int> OnTierAdvanced;
+        public event Action<int> OnTierSteppedBack;
         public event Action OnSafetyInterventionTriggered;
         public event Action OnSessionCompleted;
+        public event Action OnSessionEndedByUser;
 
         public ExposureState CurrentState => _currentState;
         public int CurrentTier => _currentTier;
@@ -168,7 +170,7 @@ namespace Acrophobia.AdaptiveFSM
                     break;
             }
 
-            HandleDebugShortcuts();
+            HandleParticipantControls();
         }
 
         /// <summary>
@@ -265,50 +267,103 @@ namespace Acrophobia.AdaptiveFSM
                 return;
             }
 
-            // 2. Steady / Hesitation Evaluation
+            // 2. Steady / Hesitation evaluation. Display and telemetry only - it no
+            // longer accumulates toward anything. The brief requires that nothing
+            // auto-advances the height hierarchy and that there are no timers, so the
+            // calm timer, the countdown and the automatic progression are all gone.
+            // The participant advances when they choose to, via RequestAdvanceTier().
             _isCurrentlySteady = (_liveTremor < _steadyTremorThreshold) && (_liveHesitation < _steadyHesitationThreshold);
 
-            if (_isCurrentlySteady)
+            if (_hud != null)
             {
-                // Accumulate calm exposure time
-                _calmTimer += Time.deltaTime;
-                if (_hud != null)
+                if (_isCurrentlySteady)
                 {
                     _hud.SetStatus(false, "STATUS: STEADY", ColorSteady);
-                    _hud.UpdateProgress(_calmTimer / _targetTierCalmSeconds, _calmTimer, _targetTierCalmSeconds);
+                }
+                else
+                {
+                    _hud.SetStatus(true, "TAKE YOUR TIME", ColorHesitation);
                 }
             }
-            else
+
+            // No stability perturbation. The cable jerk that used to fire at 15s in
+            // tiers 3-5 was a drop the participant did not initiate, which the brief
+            // forbids outright.
+        }
+
+        /// <summary>
+        /// Advances one tier. The only route to a higher tier, and only ever called in
+        /// response to a deliberate participant action.
+        /// </summary>
+        public void RequestAdvanceTier()
+        {
+            if (_currentState != ExposureState.Exposing)
             {
-                // Hesitation / Tremor detected: decay or pause timer
-                _calmTimer = Mathf.Max(0f, _calmTimer - Time.deltaTime * _calmDecayRate);
+                return;
+            }
+
+            AdvanceToNextTier();
+        }
+
+        /// <summary>
+        /// Steps back one tier at the participant's request. The brief requires a
+        /// reachable "step back" control at all times, and retreat must be as available
+        /// as approach.
+        /// </summary>
+        public void RequestStepBack()
+        {
+            if (_currentState != ExposureState.Exposing && _currentState != ExposureState.SafetyRecovery)
+            {
+                return;
+            }
+
+            if (_currentTier <= 1)
+            {
                 if (_hud != null)
                 {
-                    _hud.SetStatus(true, "HESITATION DETECTED", ColorHesitation);
-                    _hud.UpdateProgress(_calmTimer / _targetTierCalmSeconds, _calmTimer, _targetTierCalmSeconds);
+                    _hud.SetInstruction("You are at the lowest level. You can end the session at any time.");
                 }
+
+                return;
             }
 
-            // 3. Stability Perturbation (Cable Jerk) at 15.0s in Tiers 3, 4, 5
-            if (_currentTier >= 3 && !_hasJerkedThisTier && _calmTimer >= 15.0f)
+            _currentTier--;
+            _currentState = ExposureState.Exposing;
+
+            if (_catwalkController != null)
             {
-                _hasJerkedThisTier = true;
-                if (_catwalkController != null)
-                {
-                    _catwalkController.TriggerCableJerk(1.0f);
-                }
-                if (_audioManager != null)
-                {
-                    _audioManager.PlayCableCreak(1.0f);
-                    _audioManager.PlayWindGust(1.0f);
-                }
+                _catwalkController.SetTier(_currentTier);
             }
 
-            // 4. Tier Progression Check
-            if (_calmTimer >= _targetTierCalmSeconds)
+            if (_audioManager != null)
             {
-                AdvanceToNextTier();
+                _audioManager.SetTierWindIntensity(_currentTier);
             }
+
+            ApplyTierHUD(_currentTier);
+            OnTierSteppedBack?.Invoke(_currentTier);
+        }
+
+        /// <summary>
+        /// Ends the session immediately at the participant's request.
+        /// </summary>
+        public void RequestEndSession()
+        {
+            if (_currentState == ExposureState.Completed)
+            {
+                return;
+            }
+
+            _currentState = ExposureState.Completed;
+
+            if (_hud != null)
+            {
+                _hud.SetInstruction("Session ended. Well done for the exposure you completed.");
+                _hud.SetStatus(false, "STATUS: ENDED", ColorComplete);
+            }
+
+            OnSessionEndedByUser?.Invoke();
+            OnSessionCompleted?.Invoke();
         }
 
         private void AdvanceToNextTier()
@@ -346,7 +401,6 @@ namespace Acrophobia.AdaptiveFSM
                     _hud.SetTier(5, "COMPLETE");
                     _hud.SetInstruction("Session Complete! Outstanding physiological composure and courage demonstrated.");
                     _hud.SetStatus(false, "STATUS: COMPLETE", ColorComplete);
-                    _hud.UpdateProgress(1.0f, _targetTierCalmSeconds, _targetTierCalmSeconds);
                 }
                 OnSessionCompleted?.Invoke();
             }
@@ -419,10 +473,7 @@ namespace Acrophobia.AdaptiveFSM
         private void UpdateCompleted()
         {
             // Maintain completion display
-            if (_hud != null)
-            {
-                _hud.UpdateProgress(1.0f, _targetTierCalmSeconds, _targetTierCalmSeconds);
-            }
+            // No progress bar: there is nothing counting down.
         }
 
         private void ApplyTierHUD(int tier)
@@ -433,29 +484,54 @@ namespace Acrophobia.AdaptiveFSM
             _hud.SetTier(tier, TierNames[index]);
             _hud.SetInstruction(TierInstructions[index]);
             _hud.SetStatus(false, "STATUS: STEADY", ColorSteady);
-            _hud.UpdateProgress(0f, _targetTierCalmSeconds);
         }
 
-        private void HandleDebugShortcuts()
+        /// <summary>
+        /// Participant controls. These are the only route through the hierarchy: advance,
+        /// step back, and end. All three stay reachable in every exposure state, which is
+        /// what the brief requires. The old cable-jerk key is gone with the jerk itself.
+        /// </summary>
+        private void HandleParticipantControls()
         {
-            // Debug key [T]: Advance tier manually
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                AdvanceToNextTier();
-            }
+            bool advance = false;
+            bool stepBack = false;
+            bool endSession = false;
 
-            // Debug key [J]: Trigger Cable Jerk
-            if (Input.GetKeyDown(KeyCode.J))
+            try
             {
-                if (_catwalkController != null) _catwalkController.TriggerCableJerk(1.0f);
-                if (_audioManager != null) _audioManager.PlayCableCreak();
+                if (OVRInput.GetDown(OVRInput.Button.One)) advance = true;
+                if (OVRInput.GetDown(OVRInput.Button.Two)) stepBack = true;
+                if (OVRInput.GetDown(OVRInput.Button.Start)) endSession = true;
             }
+            catch (Exception) { }
 
-            // Debug key [K]: Force Safety Intervention
-            if (Input.GetKeyDown(KeyCode.K))
+#if ENABLE_INPUT_SYSTEM
+            try
             {
-                TriggerSafetyIntervention();
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null)
+                {
+                    if (kb.upArrowKey.wasPressedThisFrame) advance = true;
+                    if (kb.downArrowKey.wasPressedThisFrame) stepBack = true;
+                    if (kb.escapeKey.wasPressedThisFrame) endSession = true;
+                }
             }
+            catch (Exception) { }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetKeyDown(KeyCode.UpArrow)) advance = true;
+                if (Input.GetKeyDown(KeyCode.DownArrow)) stepBack = true;
+                if (Input.GetKeyDown(KeyCode.Escape)) endSession = true;
+            }
+            catch (Exception) { }
+#endif
+
+            if (endSession) RequestEndSession();
+            else if (advance) RequestAdvanceTier();
+            else if (stepBack) RequestStepBack();
         }
     }
 }

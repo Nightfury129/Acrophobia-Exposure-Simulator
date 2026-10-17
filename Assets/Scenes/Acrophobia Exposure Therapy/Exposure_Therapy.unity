@@ -744,7 +744,8 @@ GameObject:
   - component: {fileID: 83859210}
   - component: {fileID: 83859209}
   - component: {fileID: 83859214}
-  - component: {fileID: 83859213}
+  - component: {fileID: 83859216}
+  - component: {fileID: 83859215}
   m_Layer: 0
   m_Name: '[BuildingBlock] Camera Rig'
   m_TagString: Untagged
@@ -890,34 +891,6 @@ Transform:
   - {fileID: 2043308869}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &83859213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 83859207}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5d3044798fc385428f80882b04f91bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.ProceduralEnvironment.PlayerGravityFall
-  gravity: -9.81
-  terminalVelocity: -50
-  groundedStickVelocity: -1.5
-  groundCheckDistance: 0.45
-  groundCheckRadius: 0.2
-  respawnThresholdY: 15
-  respawnPosition: {x: -13, y: 104.22, z: -13}
-  fadeDuration: 0.6
-  blackoutHoldTime: 0.5
-  windWhooshClip: {fileID: 8300000, guid: fc583258df0e0104ebc343cd0f907239, type: 3}
-  audioSource: {fileID: 0}
-  enableLocomotion: 1
-  moveSpeed: 2.5
-  enableBodyAntiClip: 1
-  bodyRadius: 0.22
-  centerEyeAnchor: {fileID: 1341198549}
 --- !u!143 &83859214
 CharacterController:
   m_ObjectHideFlags: 0
@@ -943,6 +916,52 @@ CharacterController:
   m_SkinWidth: 0.05
   m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &83859215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83859207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b275e75a3a7ac040b7315fb2fe58521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Locomotion.TeleportLocomotion
+  _maxRange: 8
+  _maxLandingSlope: 30
+  _requiredClearance: 1.7
+  _fadeDuration: 0.12
+  _groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _rig: {fileID: 0}
+  _centerEyeAnchor: {fileID: 0}
+  _aimSource: {fileID: 0}
+  _arcRenderer: {fileID: 0}
+  _landingMarker: {fileID: 0}
+--- !u!114 &83859216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83859207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b70d904d3400cc4c8ea8f5aa12c06eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Locomotion.PlayerGroundingController
+  _groundCheckDistance: 0.6
+  _groundProbeRadius: 0.2
+  _bodyRadius: 0.22
+  _enableBodyAntiClip: 1
+  _enableEdgeContainment: 1
+  _groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _floorSettleSpeed: 6
+  _centerEyeAnchor: {fileID: 0}
 --- !u!1 &97279295
 GameObject:
   m_ObjectHideFlags: 0
@@ -11086,10 +11105,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.GazeGeometry.EdgeProximityTracker
   _maxProbeDistance: 4
   _probeStepDistance: 0.05
+  _coarseStepDistance: 0.25
+  _fineProbeRange: 1
   _nearEdgeThreshold: 0.6
   _edgeDropThreshold: 0.8
   _probeFanAngle: 60
   _probeRayCount: 11
+  _probeLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _probeRateHz: 15
   _weightGazeAvoidance: 0.4
   _weightLocomotionSlowness: 0.35
   _weightTremor: 0.25
@@ -13539,6 +13564,104 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1461283489}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1700667857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1700667861}
+  - component: {fileID: 1700667860}
+  - component: {fileID: 1700667859}
+  - component: {fileID: 1700667858}
+  m_Layer: 0
+  m_Name: '[Telemetry]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1700667858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700667857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e48c3947e1c1e429225b7a9228636c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Telemetry.RetreatEventDetector
+  _engageThresholdMetres: 0.9
+  _minRetreatGainMetres: 0.45
+  _retreatWindowSeconds: 3
+  _cooldownSeconds: 2
+  _maxMeaningfulDistance: 4
+  _edgeTracker: {fileID: 0}
+  _logger: {fileID: 0}
+--- !u!114 &1700667859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700667857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9edb97fad4302e443a4a36b75abd42b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Telemetry.EyeHeightCalibrator
+  _calibrationSeconds: 1.5
+  _sampleRateHz: 30
+  _maxHeightVariance: 0.06
+  _plausibleMinimum: 1.2
+  _plausibleMaximum: 2.2
+  _headTransform: {fileID: 0}
+  _trackingOriginTransform: {fileID: 0}
+  _logger: {fileID: 0}
+  _gazeDetector: {fileID: 0}
+--- !u!114 &1700667860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700667857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63ec3c91498d5434da285a97f8623f3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Telemetry.SessionTelemetryLogger
+  _sampleRateHz: 10
+  _flushIntervalSeconds: 2
+  _groundReferenceY: 0
+  _autoBeginOnStart: 1
+  _verboseConsoleLogging: 0
+  _headTransform: {fileID: 0}
+  _headPoseSampler: {fileID: 0}
+  _tremorFilter: {fileID: 0}
+  _swayAnalyzer: {fileID: 0}
+  _edgeTracker: {fileID: 0}
+  _gazeDetector: {fileID: 0}
+  _fsm: {fileID: 0}
+--- !u!4 &1700667861
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700667857}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1712788258
 PrefabInstance:
@@ -17356,6 +17479,70 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1012784635}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1982310127
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1982310129}
+  - component: {fileID: 1982310128}
+  m_Layer: 0
+  m_Name: '[SUDS_Prompt]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1982310128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982310127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 366f89cfb910a7b4090b5defaf02f334, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Telemetry.SudsPromptController
+  _step: 5
+  _initialValue: 0
+  _followDistance: 1.1
+  _verticalOffset: -0.08
+  _positionFollowSpeed: 6
+  _rotationFollowSpeed: 7
+  _axisDeadzone: 0.45
+  _repeatDelaySeconds: 0.35
+  _repeatIntervalSeconds: 0.12
+  _centerEyeAnchor: {fileID: 0}
+  _logger: {fileID: 0}
+  _gazeDetector: {fileID: 0}
+  _canvas: {fileID: 0}
+  _panel: {fileID: 0}
+  _questionText: {fileID: 0}
+  _valueText: {fileID: 0}
+  _hintText: {fileID: 0}
+  _anchorLowText: {fileID: 0}
+  _anchorHighText: {fileID: 0}
+  _scaleFill: {fileID: 0}
+--- !u!4 &1982310129
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982310127}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1985189835
 GameObject:
   m_ObjectHideFlags: 0
@@ -19113,3 +19300,5 @@ SceneRoots:
   - {fileID: 82131911}
   - {fileID: 1396906938}
   - {fileID: 1222598479}
+  - {fileID: 1700667861}
+  - {fileID: 1982310129}
