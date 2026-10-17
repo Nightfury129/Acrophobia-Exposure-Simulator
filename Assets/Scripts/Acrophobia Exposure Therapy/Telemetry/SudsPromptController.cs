@@ -55,6 +55,10 @@ namespace Acrophobia.Telemetry
         [Tooltip("Interval between steps while a direction is held.")]
         [SerializeField, Range(0.03f, 0.5f)] private float _repeatIntervalSeconds = 0.12f;
 
+        [Tooltip("Close on its own after this long with no answer, recorded as a non-response. " +
+                 "0 disables the timeout.")]
+        [SerializeField, Range(0f, 120f)] private float _noResponseTimeoutSeconds = 25f;
+
         [SerializeField] private Transform _centerEyeAnchor;
         [SerializeField] private SessionTelemetryLogger _logger;
         [SerializeField] private GazeAvoidanceDetector _gazeDetector;
@@ -69,6 +73,7 @@ namespace Acrophobia.Telemetry
         [SerializeField] private RectTransform _scaleFill;
 
         private bool _isOpen;
+        private float _openSince;
         private int _currentValue;
         private string _context = "unspecified";
         private float _heldDirection;
@@ -133,6 +138,7 @@ namespace Acrophobia.Telemetry
             _context = string.IsNullOrEmpty(context) ? "unspecified" : context;
             _currentValue = Mathf.Clamp(_initialValue, ScaleMinimum, ScaleMaximum);
             _isOpen = true;
+            _openSince = Time.time;
             _heldDirection = 0f;
             _heldTimer = 0f;
 
@@ -189,6 +195,20 @@ namespace Acrophobia.Telemetry
         {
             if (!_isOpen)
             {
+                return;
+            }
+
+            // Without this the prompt could hang in front of the participant forever:
+            // confirm is a keypress, and a keypress never arrives while the XR Simulator
+            // window holds focus. A non-response is also honest data - it is recorded as
+            // a skip rather than guessed at.
+            if (_noResponseTimeoutSeconds > 0f &&
+                Time.time - _openSince >= _noResponseTimeoutSeconds)
+            {
+                _isOpen = false;
+                ApplyVisibility(false);
+                _logger?.RecordEvent("suds_no_response", 0, _context, 0f);
+                OnPromptDismissed?.Invoke(_context);
                 return;
             }
 
