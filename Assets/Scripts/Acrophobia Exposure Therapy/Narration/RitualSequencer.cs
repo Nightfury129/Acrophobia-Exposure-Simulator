@@ -98,6 +98,8 @@ namespace Acrophobia.Narration
 
         private Coroutine _running;
         private int _runningTier = -1;
+        private bool _firstRitualDone;
+        private AdaptiveExposureFSM.ExposureState _lastState = AdaptiveExposureFSM.ExposureState.AwaitingStart;
 
         public bool IsRunning => _running != null;
 
@@ -313,6 +315,30 @@ namespace Acrophobia.Narration
         private void HandleTier(int tier)
         {
             RunRitual(tier);
+        }
+
+        /// <summary>
+        /// OnTierAdvanced only fires moving from one tier to the next, so tier 1 - the
+        /// first and most important ritual - would never have run off it. The session
+        /// starting is its own trigger.
+        /// </summary>
+        private void Update()
+        {
+            if (_fsm == null || !_autoRunOnTier) return;
+
+            var state = _fsm.CurrentState;
+            if (state != _lastState)
+            {
+                if (_lastState == AdaptiveExposureFSM.ExposureState.AwaitingStart
+                    && state == AdaptiveExposureFSM.ExposureState.Exposing
+                    && !_firstRitualDone)
+                {
+                    _firstRitualDone = true;
+                    RunRitual(_fsm.CurrentTier);
+                }
+
+                _lastState = state;
+            }
         }
     }
 }

@@ -38,6 +38,10 @@ namespace Acrophobia.ProceduralEnvironment
         [Tooltip("Sway multiplier once the balcony door is open and air is moving.")]
         [SerializeField, Range(1f, 6f)] private float _draughtMultiplier = 2.6f;
 
+        [Tooltip("How close the participant must be to draw it, in metres.")]
+        [SerializeField, Range(0.5f, 4f)] private float _reachDistance = 2.0f;
+
+        [SerializeField] private Transform _centerEyeAnchor;
         [SerializeField] private BalconyDoorController _door;
         [SerializeField] private SessionTelemetryLogger _logger;
 
@@ -65,6 +69,13 @@ namespace Acrophobia.ProceduralEnvironment
         {
             if (_door == null) _door = FindAnyObjectByType<BalconyDoorController>();
             if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
+
+            if (_centerEyeAnchor == null)
+            {
+                var found = GameObject.Find("CenterEyeAnchor");
+                if (found != null) _centerEyeAnchor = found.transform;
+                else if (Camera.main != null) _centerEyeAnchor = Camera.main.transform;
+            }
         }
 
         /// <summary>
@@ -119,9 +130,68 @@ namespace Acrophobia.ProceduralEnvironment
             CaptureRest();
         }
 
+        public bool IsWithinReach
+        {
+            get
+            {
+                if (_centerEyeAnchor == null || _slats == null || _slats.Length == 0) return false;
+
+                Transform mid = _slats[_slats.Length / 2];
+                if (mid == null) return false;
+
+                Vector3 a = _centerEyeAnchor.position, b = mid.position;
+                float dx = a.x - b.x, dz = a.z - b.z;
+                return Mathf.Sqrt(dx * dx + dz * dz) <= _reachDistance;
+            }
+        }
+
+        // Same interaction as the balcony door, so there is one verb to learn rather
+        // than two. Nothing opens the curtain on the participant's behalf.
+        private bool WasInteractPressed()
+        {
+            try
+            {
+                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger) ||
+                    OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger) ||
+                    OVRInput.GetDown(OVRInput.Button.One))
+                {
+                    return true;
+                }
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            try
+            {
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null && (kb.eKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame))
+                {
+                    return true;
+                }
+            }
+            catch (Exception) { }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Space)) return true;
+            }
+            catch (Exception) { }
+#endif
+
+            return false;
+        }
+
         private void Update()
         {
             CaptureRest();
+
+            if (IsWithinReach && WasInteractPressed())
+            {
+                Toggle();
+            }
+
             if (_slats == null || _slats.Length == 0 || _closedX == null) return;
 
             if (!Mathf.Approximately(_openAmount, _targetOpen))
