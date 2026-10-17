@@ -73,6 +73,51 @@ namespace Acrophobia.AdaptiveFSM
         /// <summary>
         /// Resolves missing clips, transforms, and AudioSources.
         /// </summary>
+        /// <summary>
+        /// Blends the ambience between outdoors (0) and sealed indoors (1).
+        ///
+        /// Driven by the balcony door. Opening it lifts the muffling and lets the city in,
+        /// which is the single strongest moment in the sequence: the drop is revealed by
+        /// sound arriving before the participant has even looked down. Wind is attenuated
+        /// harder than traffic because wind is a near-field cue that a closed door removes
+        /// almost entirely, while traffic still carries up from the street.
+        /// </summary>
+        public void SetIndoorAttenuation(float indoor)
+        {
+            indoor = Mathf.Clamp01(indoor);
+
+            if (_windAudioSource != null)
+            {
+                _windAudioSource.volume = _windVolume * Mathf.Lerp(1f, 0.06f, indoor);
+                ApplyLowPass(_windAudioSource, Mathf.Lerp(22000f, 520f, indoor));
+            }
+
+            if (_trafficAudioSource != null)
+            {
+                _trafficAudioSource.volume = _trafficVolume * Mathf.Lerp(1f, 0.28f, indoor);
+                ApplyLowPass(_trafficAudioSource, Mathf.Lerp(22000f, 900f, indoor));
+            }
+
+            if (_creakAudioSource != null)
+            {
+                _creakAudioSource.volume = Mathf.Lerp(1f, 0.3f, indoor);
+            }
+        }
+
+        /// <summary>
+        /// Adds the filter on first use rather than requiring it to be wired in the scene.
+        /// </summary>
+        private static void ApplyLowPass(AudioSource source, float cutoffHz)
+        {
+            var filter = source.GetComponent<AudioLowPassFilter>();
+            if (filter == null)
+            {
+                filter = source.gameObject.AddComponent<AudioLowPassFilter>();
+            }
+
+            filter.cutoffFrequency = cutoffHz;
+        }
+
         public void ResolveReferences()
         {
 #if UNITY_EDITOR
