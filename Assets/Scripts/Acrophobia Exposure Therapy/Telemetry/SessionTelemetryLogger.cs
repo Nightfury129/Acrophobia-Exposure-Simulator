@@ -598,7 +598,10 @@ namespace Acrophobia.Telemetry
 
         private void HandleSafetyIntervention()
         {
-            RecordEvent("safety_intervention", _observedTier, "reverted_to_tier_1", 0f);
+            // The FSM no longer reverts the tier on high arousal - it offers support and
+            // leaves the choice to the participant - so the old label was describing
+            // something that no longer happens.
+            RecordEvent("high_arousal_support_offered", _observedTier, "no_tier_change", 0f);
             FlushNow();
         }
 

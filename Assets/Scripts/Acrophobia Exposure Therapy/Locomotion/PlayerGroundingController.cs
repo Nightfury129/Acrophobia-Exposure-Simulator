@@ -45,6 +45,9 @@ namespace Acrophobia.Locomotion
         [Tooltip("Hold the virtual body on solid ground when the tracked head moves over open air.")]
         [SerializeField] private bool _enableEdgeContainment = true;
 
+        [Tooltip("Consecutive frames the floor must be missing before containment acts.")]
+        [SerializeField, Range(1, 15)] private int _framesBeforeContainment = 5;
+
         [Tooltip("Largest rig correction containment may apply in one frame, in metres.")]
         [SerializeField, Range(0.01f, 0.5f)] private float _maxContainmentCorrection = 0.08f;
 
@@ -86,6 +89,7 @@ namespace Acrophobia.Locomotion
         public event Action OnEdgeContainmentReleased;
 
         private bool _containmentEngaged;
+        private int _framesWithoutFloor;
 
         private void Awake()
         {
@@ -188,6 +192,17 @@ namespace Acrophobia.Locomotion
         private void ApplyEdgeContainment()
         {
             if (_hasFloor || !_hasSafePosition)
+            {
+                _framesWithoutFloor = 0;
+                return;
+            }
+
+            // Debounce. A sphere cast at a platform boundary flickers between hit and
+            // miss on consecutive frames, and correcting on a single miss made the rig
+            // creep continuously - which also fed phantom head movement into the retreat
+            // detector. Require the floor to be genuinely gone before touching the rig.
+            _framesWithoutFloor++;
+            if (_framesWithoutFloor < _framesBeforeContainment)
             {
                 return;
             }
