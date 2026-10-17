@@ -66,6 +66,7 @@ namespace Acrophobia.AdaptiveFSM
         [SerializeField] private float _calmTimer = 0f;
         [SerializeField] private float _recoveryTimer = 0f;
         [SerializeField] private bool _isCurrentlySteady = true;
+        private bool _wasOfferingSupport = false;
         [SerializeField] private bool _hasJerkedThisTier = false;
 
         // Current telemetry cache
@@ -260,11 +261,35 @@ namespace Acrophobia.AdaptiveFSM
 
         private void UpdateExposing()
         {
-            // 1. Safety Check: Acute Panic / Freeze Intervention
-            if (_liveTremor > _panicTremorThreshold || _liveFrozen)
+            // 1. Distress support. This used to call TriggerSafetyIntervention(), which
+            // reverted the platform to tier 1 on its own. That was wrong twice over: an
+            // automatic revert is an un-requested change to the height hierarchy, which
+            // the brief forbids as much as auto-advancing; and postural stillness is the
+            // goal of the exercise, not evidence of panic. A participant standing
+            // motionless at an edge looking down is succeeding, and the freeze detector
+            // cannot tell that apart from fear-immobility.
+            //
+            // So nothing is changed for them. High distress surfaces an offer, and the
+            // participant decides whether to step back or stop.
+            bool highDistress = _liveTremor > _panicTremorThreshold;
+            if (highDistress != _wasOfferingSupport)
             {
-                TriggerSafetyIntervention();
-                return;
+                _wasOfferingSupport = highDistress;
+
+                if (highDistress)
+                {
+                    if (_hud != null)
+                    {
+                        _hud.SetInstruction("Breathe slowly. You can step back or end the session whenever you want.");
+                        _hud.SetStatus(true, "HIGH AROUSAL", ColorSafety);
+                    }
+
+                    OnSafetyInterventionTriggered?.Invoke();
+                }
+                else
+                {
+                    ApplyTierHUD(_currentTier);
+                }
             }
 
             // 2. Steady / Hesitation evaluation. Display and telemetry only - it no

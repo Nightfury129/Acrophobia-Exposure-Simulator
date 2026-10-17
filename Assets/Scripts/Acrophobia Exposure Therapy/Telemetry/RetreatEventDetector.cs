@@ -55,11 +55,16 @@ namespace Acrophobia.Telemetry
         [Tooltip("Distances above this are treated as 'no edge nearby'. Must match the tracker's probe range.")]
         [SerializeField, Range(1f, 10f)] private float _maxMeaningfulDistance = 4.0f;
 
+        [Tooltip("Minimum head movement, in metres, required to corroborate a retreat.")]
+        [SerializeField, Range(0.05f, 1f)] private float _minHeadDisplacementMetres = 0.15f;
+
+        [SerializeField] private Transform _headTransform;
         [SerializeField] private EdgeProximityTracker _edgeTracker;
         [SerializeField] private SessionTelemetryLogger _logger;
 
         private DetectorState _state = DetectorState.Idle;
         private float _closestApproach;
+        private Vector3 _closestApproachHeadPosition;
         private float _engagedTimer;
         private float _cooldownTimer;
         private int _retreatCount;
@@ -87,6 +92,13 @@ namespace Acrophobia.Telemetry
         {
             if (_edgeTracker == null) _edgeTracker = FindAnyObjectByType<EdgeProximityTracker>();
             if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
+
+            if (_headTransform == null)
+            {
+                var gaze = FindAnyObjectByType<GazeAvoidanceDetector>();
+                if (gaze != null) _headTransform = gaze.CenterEyeAnchor;
+                if (_headTransform == null && Camera.main != null) _headTransform = Camera.main.transform;
+            }
         }
 
         /// <summary>
@@ -144,6 +156,7 @@ namespace Acrophobia.Telemetry
                     {
                         _state = DetectorState.Engaged;
                         _closestApproach = distance;
+                        _closestApproachHeadPosition = CurrentHeadPosition();
                         _engagedTimer = 0f;
                     }
                     break;
@@ -156,12 +169,24 @@ namespace Acrophobia.Telemetry
                         // Moved nearer: reset the window so the gain is always measured
                         // from the closest point actually reached.
                         _closestApproach = distance;
+                        _closestApproachHeadPosition = CurrentHeadPosition();
                         _engagedTimer = 0f;
                     }
 
                     float gained = distance - _closestApproach;
 
-                    if (gained >= _minRetreatGainMetres && _engagedTimer <= _retreatWindowSeconds)
+                    // A retreat requires the participant to have actually moved. The edge
+                    // probe can jump from a near reading to its no-edge-found ceiling in
+                    // one tick - stepping behind a railing does it - which looked like a
+                    // multi-metre withdrawal while the head sat perfectly still. Requiring
+                    // corroborating head displacement removes that whole class of false
+                    // positive, which was otherwise writing junk into the graded telemetry.
+                    bool participantMoved = HeadDisplacementSince(_closestApproachHeadPosition)
+                                            >= _minHeadDisplacementMetres;
+
+                    if (gained >= _minRetreatGainMetres
+                        && _engagedTimer <= _retreatWindowSeconds
+                        && participantMoved)
                     {
                         ReportRetreat(gained, _closestApproach);
                         _state = DetectorState.Cooldown;
@@ -179,6 +204,7 @@ namespace Acrophobia.Telemetry
                             // Still at the edge, just lingering. Keep watching from here.
                             _engagedTimer = 0f;
                             _closestApproach = distance;
+                            _closestApproachHeadPosition = CurrentHeadPosition();
                         }
                     }
                     break;
@@ -191,10 +217,33 @@ namespace Acrophobia.Telemetry
                             ? DetectorState.Engaged
                             : DetectorState.Idle;
                         _closestApproach = distance;
+                        _closestApproachHeadPosition = CurrentHeadPosition();
                         _engagedTimer = 0f;
                     }
                     break;
             }
+        }
+
+        private Vector3 CurrentHeadPosition()
+        {
+            return _headTransform != null ? _headTransform.position : Vector3.zero;
+        }
+
+        /// <summary>
+        /// Horizontal head displacement from a reference point, in metres.
+        /// </summary>
+        private float HeadDisplacementSince(Vector3 reference)
+        {
+            if (_headTransform == null)
+            {
+                // No head reference available: do not gate on movement we cannot measure.
+                return float.MaxValue;
+            }
+
+            Vector3 now = _headTransform.position;
+            float dx = now.x - reference.x;
+            float dz = now.z - reference.z;
+            return Mathf.Sqrt(dx * dx + dz * dz);
         }
 
         private void ReportRetreat(float distanceGained, float fromDistance)
@@ -213,6 +262,7 @@ namespace Acrophobia.Telemetry
         {
             _state = DetectorState.Idle;
             _closestApproach = 0f;
+            _closestApproachHeadPosition = CurrentHeadPosition();
             _engagedTimer = 0f;
             _cooldownTimer = 0f;
             _retreatCount = 0;

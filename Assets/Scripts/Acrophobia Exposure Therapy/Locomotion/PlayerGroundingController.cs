@@ -45,6 +45,9 @@ namespace Acrophobia.Locomotion
         [Tooltip("Hold the virtual body on solid ground when the tracked head moves over open air.")]
         [SerializeField] private bool _enableEdgeContainment = true;
 
+        [Tooltip("Largest rig correction containment may apply in one frame, in metres.")]
+        [SerializeField, Range(0.01f, 0.5f)] private float _maxContainmentCorrection = 0.08f;
+
         [Tooltip("Geometry treated as standable floor and as barriers.")]
         [SerializeField] private LayerMask _groundLayerMask = ~0;
 
@@ -196,14 +199,33 @@ namespace Acrophobia.Locomotion
                 0f,
                 headPos.z - _lastSafeHeadPosition.z);
 
-            if (overshoot.sqrMagnitude < 0.0000001f)
+            float overshootDistance = overshoot.magnitude;
+
+            if (overshootDistance < 0.0005f)
             {
                 return;
+            }
+
+            // Clamp so a bad floor reading cannot fling the rig across the scene. An
+            // earlier version applied the raw offset every frame the floor was missing
+            // and never re-anchored, so the correction accumulated and walked the rig
+            // several metres off its spawn.
+            if (overshootDistance > _maxContainmentCorrection)
+            {
+                overshoot = overshoot * (_maxContainmentCorrection / overshootDistance);
             }
 
             // Move the rig back by the overshoot: the real head keeps going, the virtual
             // body does not.
             transform.position -= overshoot;
+
+            // Re-anchor to where the head now sits. This makes the correction idempotent:
+            // if the participant stops moving, the next frame computes a zero overshoot
+            // instead of re-applying this one.
+            _lastSafeHeadPosition = new Vector3(
+                _centerEyeAnchor.position.x,
+                _lastSafeHeadPosition.y,
+                _centerEyeAnchor.position.z);
 
             if (!_containmentEngaged)
             {
