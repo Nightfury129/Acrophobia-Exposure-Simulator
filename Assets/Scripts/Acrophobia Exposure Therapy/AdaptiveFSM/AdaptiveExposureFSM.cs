@@ -67,6 +67,13 @@ namespace Acrophobia.AdaptiveFSM
         [SerializeField] private float _recoveryTimer = 0f;
         [SerializeField] private bool _isCurrentlySteady = true;
         private bool _wasOfferingSupport = false;
+
+        [Tooltip("Begin the session automatically after this long. The opening ritual is " +
+                 "the introduction, so there is nothing for a start prompt to add, and a " +
+                 "keypress cannot reach Unity while the XR Simulator window has focus.")]
+        [SerializeField, Range(0f, 10f)] private float _autoStartSeconds = 1.0f;
+
+        private float _awaitingTimer;
         [SerializeField] private bool _hasJerkedThisTier = false;
 
         // Current telemetry cache
@@ -251,6 +258,15 @@ namespace Acrophobia.AdaptiveFSM
                 }
             }
             catch (Exception) { }
+
+            // The session also starts on its own. Requiring a keypress stranded the
+            // whole opening - ritual, calibration, baseline rating - behind an input
+            // that never arrives while the simulator window holds focus.
+            _awaitingTimer += Time.deltaTime;
+            if (_autoStartSeconds > 0f && _awaitingTimer >= _autoStartSeconds)
+            {
+                startPressed = true;
+            }
 
             if (startPressed)
             {

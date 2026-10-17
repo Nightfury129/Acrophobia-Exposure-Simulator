@@ -6709,6 +6709,8 @@ MonoBehaviour:
   _swayAmplitude: 0.022
   _swayFrequency: 0.33
   _draughtMultiplier: 2.6
+  _reachDistance: 2
+  _centerEyeAnchor: {fileID: 0}
   _door: {fileID: 1355217016}
   _logger: {fileID: 1700667860}
 --- !u!1001 &650634971
@@ -14089,6 +14091,7 @@ MonoBehaviour:
   _calmTimer: 0
   _recoveryTimer: 0
   _isCurrentlySteady: 1
+  _autoStartSeconds: 1
   _hasJerkedThisTier: 0
   _liveTremor: 0
   _liveHesitation: 0
@@ -16520,7 +16523,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1396906937
 MonoBehaviour:
   m_ObjectHideFlags: 0

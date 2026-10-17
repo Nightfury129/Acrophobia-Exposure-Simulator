@@ -133,6 +133,7 @@ namespace Acrophobia.Locomotion
                 if (_centerEyeAnchor == null) return;
             }
 
+            SyncCapsuleToHead();
             UpdateFloorBeneathFeet();
 
             if (_enableEdgeContainment)
@@ -146,6 +147,24 @@ namespace Acrophobia.Locomotion
             }
 
             SettleOntoFloor();
+        }
+
+        /// <summary>
+        /// Keeps the collision capsule under the tracked head rather than under the rig
+        /// origin.
+        ///
+        /// Room-scale means the head wanders away from the rig, so a capsule pinned to
+        /// the rig sits somewhere the participant is not. Anti-clip was testing an
+        /// overlap at the head and then resolving it at the rig, which is why leaning
+        /// and stepping through walls still worked. PlayerGravityFall did this sync and
+        /// it was lost when that component was replaced.
+        /// </summary>
+        private void SyncCapsuleToHead()
+        {
+            if (_characterController == null || _centerEyeAnchor == null) return;
+
+            Vector3 headLocal = transform.InverseTransformPoint(_centerEyeAnchor.position);
+            _characterController.center = new Vector3(headLocal.x, 0.9f, headLocal.z);
         }
 
         /// <summary>
