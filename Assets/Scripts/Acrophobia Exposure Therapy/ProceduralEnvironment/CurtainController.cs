@@ -46,6 +46,7 @@ namespace Acrophobia.ProceduralEnvironment
         [SerializeField] private SessionTelemetryLogger _logger;
 
         private float[] _closedX;
+        private float[] _closedZ;
         private float[] _phase;
         private float _openAmount;      // 0 closed, 1 open
         private float _targetOpen;
@@ -87,12 +88,14 @@ namespace Acrophobia.ProceduralEnvironment
             if (_captured || _slats == null || _slats.Length == 0) return;
 
             _closedX = new float[_slats.Length];
+            _closedZ = new float[_slats.Length];
             _phase = new float[_slats.Length];
 
             for (int i = 0; i < _slats.Length; i++)
             {
                 if (_slats[i] == null) continue;
                 _closedX[i] = _slats[i].localPosition.x;
+                _closedZ[i] = _slats[i].localPosition.z;
 
                 // Irrational-ish stride keeps neighbouring slats from syncing up, which
                 // is what would make the row read as a solid board instead of cloth.
@@ -222,7 +225,10 @@ namespace Acrophobia.ProceduralEnvironment
 
                 Vector3 p = slat.localPosition;
                 p.x = _closedX[i] + side * travel + sway;
-                p.z = Mathf.Sin(t * 0.73f + _phase[i]) * _swayAmplitude * 0.45f * draught * swayScale;
+                // Offset from the captured rest depth. Assigning the sway straight into
+                // z snapped every slat to the parent origin, which parked the whole
+                // curtain at z = 0 instead of on the window wall.
+                p.z = _closedZ[i] + Mathf.Sin(t * 0.73f + _phase[i]) * _swayAmplitude * 0.45f * draught * swayScale;
                 slat.localPosition = p;
             }
         }
