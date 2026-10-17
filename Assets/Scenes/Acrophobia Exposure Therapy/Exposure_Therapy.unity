@@ -5779,6 +5779,7 @@ GameObject:
   m_Component:
   - component: {fileID: 565717252}
   - component: {fileID: 565717253}
+  - component: {fileID: 565717254}
   m_Layer: 0
   m_Name: Wash_Bed_A
   m_TagString: Untagged
@@ -5866,6 +5867,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &565717254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 565717251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &590983506
 GameObject:
   m_ObjectHideFlags: 0
@@ -20465,6 +20495,8 @@ GameObject:
   - component: {fileID: 1791258588}
   - component: {fileID: 1791258587}
   - component: {fileID: 1791258586}
+  - component: {fileID: 1791258590}
+  - component: {fileID: 1791258589}
   m_Layer: 0
   m_Name: '[Narrator]'
   m_TagString: Untagged
@@ -20703,6 +20735,256 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1791258589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791258585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fb62789d8245f04d84e0b59348d1ac3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Narration.ScreenFader
+  _defaultFadeSeconds: 0.8
+--- !u!114 &1791258590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1791258585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4584b2b2635da964ab24563c142765ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Narration.RitualSequencer
+  _rituals:
+  - Label: Bedroom morning
+    Beats:
+    - Kind: 0
+      Line: He woke up. Same room as last time, though they had moved it up a few
+        floors since.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 1
+      Line: Water running. The ordinary business of a face being washed.
+      Clip: {fileID: 0}
+      Seconds: 4.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 1
+      Line: Two minutes of brushing, which he did properly, because he always does.
+      Clip: {fileID: 0}
+      Seconds: 4
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: Coffee. He drank it standing up, the way people do when they are putting
+        something off.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 4
+      Line: 
+      Clip: {fileID: 0}
+      Seconds: 1
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: The light through the window was doing something worth looking at. He
+        noticed. That is the whole trick, really - noticing.
+      Clip: {fileID: 0}
+      Seconds: 6.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+  - Label: Office morning
+    Beats:
+    - Kind: 0
+      Line: A desk this time. Twelve metres up, which is nothing, which he knows,
+        which does not help.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 1
+      Line: A keyboard, briefly. Three emails that could have waited.
+      Clip: {fileID: 0}
+      Seconds: 4
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: Coffee again, worse than yesterday's. He drank it anyway.
+      Clip: {fileID: 0}
+      Seconds: 4.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 4
+      Line: 
+      Clip: {fileID: 0}
+      Seconds: 0.8
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: The window was right there. It had been right there the whole time.
+      Clip: {fileID: 0}
+      Seconds: 5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+  - Label: Plant room
+    Beats:
+    - Kind: 0
+      Line: Thirty metres. A room full of machinery that hums and asks nothing of
+        him.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 1
+      Line: A gauge checked, a number written down. Honest work.
+      Clip: {fileID: 0}
+      Seconds: 4
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 4
+      Line: 
+      Clip: {fileID: 0}
+      Seconds: 0.8
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: The access door was open a crack, and the light coming through it was
+        very good.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+  - Label: Stairwell landing
+    Beats:
+    - Kind: 0
+      Line: Sixty. He took the stairs, which took a while, which was fine.
+      Clip: {fileID: 0}
+      Seconds: 5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 1
+      Line: Footsteps on concrete. A long way up, one step at a time.
+      Clip: {fileID: 0}
+      Seconds: 5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 4
+      Line: 
+      Clip: {fileID: 0}
+      Seconds: 0.8
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: One more door. He has opened four of these now, and the building has
+        not once dropped him.
+      Clip: {fileID: 0}
+      Seconds: 6
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+  - Label: Terrace
+    Beats:
+    - Kind: 0
+      Line: The roof. No routine for this one. No kettle, no desk, no door to close
+        behind him.
+      Clip: {fileID: 0}
+      Seconds: 6
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 4
+      Line: 
+      Clip: {fileID: 0}
+      Seconds: 1
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+    - Kind: 0
+      Line: Only the city, and him, and as long as he wants.
+      Clip: {fileID: 0}
+      Seconds: 5.5
+      Marker: {fileID: 0}
+      Radius: 1
+      TimeoutSeconds: 45
+      Prop: {fileID: 0}
+      PropActive: 1
+  _autoRunOnTier: 1
+  _openingBlackSeconds: 1.2
+  _fader: {fileID: 1791258589}
+  _subtitles: {fileID: 149718944}
+  _interludeSource: {fileID: 1791258586}
+  _centerEyeAnchor: {fileID: 1341198549}
+  _fsm: {fileID: 1222598477}
+  _logger: {fileID: 1700667860}
 --- !u!1 &1791931299
 GameObject:
   m_ObjectHideFlags: 0
@@ -21359,6 +21641,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1824210738}
   - component: {fileID: 1824210739}
+  - component: {fileID: 1824210740}
   m_Layer: 0
   m_Name: Wash_Bed_B
   m_TagString: Untagged
@@ -21446,6 +21729,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1824210740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1824210737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1827144874
 GameObject:
   m_ObjectHideFlags: 0
@@ -24067,6 +24379,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1984923624}
   - component: {fileID: 1984923625}
+  - component: {fileID: 1984923626}
   m_Layer: 0
   m_Name: Light
   m_TagString: Untagged
@@ -24154,6 +24467,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1984923626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984923623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1985189835
 GameObject:
   m_ObjectHideFlags: 0

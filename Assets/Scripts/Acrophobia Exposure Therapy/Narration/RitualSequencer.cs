@@ -1,0 +1,289 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Acrophobia.AdaptiveFSM;
+using Acrophobia.Telemetry;
+
+namespace Acrophobia.Narration
+{
+    /// <summary>
+    /// Runs a short ordinary routine before each exposure: wash, coffee, and only then
+    /// the narrator noticing the light outside.
+    ///
+    /// This is therapeutically the right shape, not just atmosphere. An exposure session
+    /// should not open on the feared stimulus - a few minutes of mundane, controllable
+    /// activity gives the participant a settled baseline, which is also when the honest
+    /// SUDS reading can be taken. The height then arrives into a grounded state rather
+    /// than a cold start.
+    ///
+    /// Most beats cost almost nothing to build. An Interlude fades to black, plays a
+    /// sound, and holds: a bathroom that is never modelled, a kettle that does not exist,
+    /// each standing up on two audio clips. That is the cheapest scene in the project by
+    /// a wide margin.
+    ///
+    /// Deliberately non-blocking. The balcony door stays usable throughout, so a
+    /// participant who wants to walk straight out can, and the narrator simply notices.
+    /// Gating the exposure behind a routine would take away the agency the whole design
+    /// rests on, and would make the run tedious on the fifth repetition.
+    /// </summary>
+    public class RitualSequencer : MonoBehaviour
+    {
+        public enum BeatKind
+        {
+            Narrate,
+            Interlude,
+            WaitForApproach,
+            SetProp,
+            Pause
+        }
+
+        [Serializable]
+        public class Beat
+        {
+            public BeatKind Kind = BeatKind.Narrate;
+
+            [TextArea(2, 3)]
+            public string Line = "";
+
+            [Tooltip("Interlude audio. The beat still runs, silently, without one.")]
+            public AudioClip Clip;
+
+            [Tooltip("Seconds held. For an Interlude this is the time spent on black.")]
+            public float Seconds = 3f;
+
+            [Tooltip("WaitForApproach: the place the participant has to reach.")]
+            public Transform Marker;
+
+            [Tooltip("WaitForApproach: how close counts, in metres.")]
+            public float Radius = 1.0f;
+
+            [Tooltip("WaitForApproach: give up after this long so nobody gets stuck.")]
+            public float TimeoutSeconds = 45f;
+
+            [Tooltip("SetProp: object toggled.")]
+            public GameObject Prop;
+
+            public bool PropActive = true;
+        }
+
+        [Serializable]
+        public class TierRitual
+        {
+            public string Label = "Tier";
+            public Beat[] Beats = Array.Empty<Beat>();
+        }
+
+        [Tooltip("One ritual per tier, in order. Entry 0 is tier 1.")]
+        [SerializeField] private TierRitual[] _rituals = new TierRitual[5];
+
+        [Tooltip("Run the ritual automatically when a tier begins.")]
+        [SerializeField] private bool _autoRunOnTier = true;
+
+        [Tooltip("Seconds of black before the first fade-in, so a session opens on waking.")]
+        [SerializeField, Range(0f, 4f)] private float _openingBlackSeconds = 1.2f;
+
+        [SerializeField] private ScreenFader _fader;
+        [SerializeField] private NarratorSubtitleView _subtitles;
+        [SerializeField] private AudioSource _interludeSource;
+        [SerializeField] private Transform _centerEyeAnchor;
+        [SerializeField] private AdaptiveExposureFSM _fsm;
+        [SerializeField] private SessionTelemetryLogger _logger;
+
+        private Coroutine _running;
+        private int _runningTier = -1;
+
+        public bool IsRunning => _running != null;
+
+        public int RunningTier => _runningTier;
+
+        public event Action<int> OnRitualStarted;
+
+        public event Action<int> OnRitualCompleted;
+
+        private void Awake()
+        {
+            ResolveReferences();
+        }
+
+        private void OnEnable()
+        {
+            if (_fsm != null && _autoRunOnTier)
+            {
+                _fsm.OnTierAdvanced += HandleTier;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_fsm != null)
+            {
+                _fsm.OnTierAdvanced -= HandleTier;
+            }
+        }
+
+        public void ResolveReferences()
+        {
+            if (_fsm == null) _fsm = FindAnyObjectByType<AdaptiveExposureFSM>();
+            if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
+            if (_subtitles == null) _subtitles = FindAnyObjectByType<NarratorSubtitleView>();
+
+            if (_fader == null)
+            {
+                _fader = FindAnyObjectByType<ScreenFader>();
+                if (_fader == null) _fader = gameObject.AddComponent<ScreenFader>();
+            }
+
+            if (_interludeSource == null)
+            {
+                _interludeSource = GetComponent<AudioSource>();
+                if (_interludeSource == null)
+                {
+                    _interludeSource = gameObject.AddComponent<AudioSource>();
+                    _interludeSource.playOnAwake = false;
+                    _interludeSource.spatialBlend = 0f;
+                }
+            }
+
+            if (_centerEyeAnchor == null)
+            {
+                var found = GameObject.Find("CenterEyeAnchor");
+                if (found != null) _centerEyeAnchor = found.transform;
+                else if (Camera.main != null) _centerEyeAnchor = Camera.main.transform;
+            }
+        }
+
+        public void RunRitual(int tier)
+        {
+            if (_rituals == null || _rituals.Length == 0) return;
+            if (_running != null) StopCoroutine(_running);
+
+            int index = Mathf.Clamp(tier - 1, 0, _rituals.Length - 1);
+            _running = StartCoroutine(Play(index, tier));
+        }
+
+        public void SkipRitual()
+        {
+            if (_running == null) return;
+
+            StopCoroutine(_running);
+            _running = null;
+
+            _subtitles?.Hide();
+            _fader?.SetAlphaImmediate(0f);
+            _logger?.RecordEvent("ritual_skipped", _runningTier, "participant_or_system", 0f);
+            _runningTier = -1;
+        }
+
+        public void SetRituals(TierRitual[] rituals)
+        {
+            _rituals = rituals;
+        }
+
+        public int RitualCount => _rituals != null ? _rituals.Length : 0;
+
+        private IEnumerator Play(int index, int tier)
+        {
+            _runningTier = tier;
+            TierRitual ritual = _rituals[index];
+
+            _logger?.RecordEvent("ritual_started", tier,
+                ritual != null ? ritual.Label : "unnamed", 0f);
+            OnRitualStarted?.Invoke(tier);
+
+            // Open on black so the session begins at the moment of waking.
+            if (_openingBlackSeconds > 0f && _fader != null)
+            {
+                _fader.SetAlphaImmediate(1f);
+                yield return new WaitForSeconds(_openingBlackSeconds);
+                yield return _fader.FadeTo(0f, 1.2f);
+            }
+
+            if (ritual != null && ritual.Beats != null)
+            {
+                for (int i = 0; i < ritual.Beats.Length; i++)
+                {
+                    yield return RunBeat(ritual.Beats[i]);
+                }
+            }
+
+            _subtitles?.Hide();
+            _logger?.RecordEvent("ritual_completed", tier,
+                ritual != null ? ritual.Label : "unnamed", 0f);
+            OnRitualCompleted?.Invoke(tier);
+
+            _running = null;
+            _runningTier = -1;
+        }
+
+        private IEnumerator RunBeat(Beat beat)
+        {
+            if (beat == null) yield break;
+
+            switch (beat.Kind)
+            {
+                case BeatKind.Narrate:
+                    _subtitles?.Show(beat.Line);
+                    yield return new WaitForSeconds(Mathf.Max(0.5f, beat.Seconds));
+                    _subtitles?.Hide();
+                    break;
+
+                case BeatKind.Interlude:
+                    // The whole trick: a scene implied by sound, never built.
+                    if (_fader != null) yield return _fader.FadeTo(1f, 0.7f);
+
+                    if (!string.IsNullOrEmpty(beat.Line)) _subtitles?.Show(beat.Line);
+
+                    if (beat.Clip != null && _interludeSource != null)
+                    {
+                        _interludeSource.clip = beat.Clip;
+                        _interludeSource.Play();
+                    }
+
+                    yield return new WaitForSeconds(Mathf.Max(0.5f, beat.Seconds));
+
+                    if (_interludeSource != null && _interludeSource.isPlaying)
+                    {
+                        _interludeSource.Stop();
+                    }
+
+                    _subtitles?.Hide();
+                    if (_fader != null) yield return _fader.FadeTo(0f, 0.9f);
+                    break;
+
+                case BeatKind.WaitForApproach:
+                    if (!string.IsNullOrEmpty(beat.Line)) _subtitles?.Show(beat.Line);
+
+                    float waited = 0f;
+                    while (waited < beat.TimeoutSeconds)
+                    {
+                        if (beat.Marker == null || _centerEyeAnchor == null) break;
+
+                        Vector3 a = _centerEyeAnchor.position;
+                        Vector3 b = beat.Marker.position;
+                        float dx = a.x - b.x, dz = a.z - b.z;
+                        if (Mathf.Sqrt(dx * dx + dz * dz) <= beat.Radius) break;
+
+                        waited += Time.deltaTime;
+                        yield return null;
+                    }
+
+                    _subtitles?.Hide();
+                    break;
+
+                case BeatKind.SetProp:
+                    if (beat.Prop != null) beat.Prop.SetActive(beat.PropActive);
+                    break;
+
+                case BeatKind.Pause:
+                    yield return new WaitForSeconds(Mathf.Max(0.1f, beat.Seconds));
+                    break;
+            }
+        }
+
+        private void HandleTier(int tier)
+        {
+            RunRitual(tier);
+        }
+    }
+}
