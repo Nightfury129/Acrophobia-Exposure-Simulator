@@ -212,6 +212,15 @@ namespace Acrophobia.SignalProcessing
         {
             if (dt <= 0f) return;
 
+            // Same guard as TremorBandFilter. This also subscribes to the sampler's
+            // event, and a subscriber that throws can stop the rest of the invocation
+            // list from running - so the tremor crash was very likely taking sway down
+            // with it.
+            if (_swayFilterX == null || _swayFilterZ == null)
+            {
+                InitializeSwayFilters();
+            }
+
             // Recalculate filter coefficients if sample rate changed
             float currentSampleRate = 1f / dt;
             if (Mathf.Abs(currentSampleRate - _lastSampleRate) > 1.0f)

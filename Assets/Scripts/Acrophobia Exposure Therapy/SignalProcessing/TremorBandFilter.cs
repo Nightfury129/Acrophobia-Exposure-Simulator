@@ -146,6 +146,16 @@ namespace Acrophobia.SignalProcessing
         {
             if (dt <= 0f) return TremorIntensity;
 
+            // The filters are built in Awake, but this method is public and was being
+            // reached before that had happened - throwing a NullReferenceException on
+            // every sample, which both spammed the log and left TremorIntensity stuck at
+            // zero. Since tremor feeds the hesitation index and the FSM, that silently
+            // disabled a chunk of the telemetry. Build on demand instead of assuming.
+            if (_filterX == null || _filterY == null || _filterZ == null)
+            {
+                InitializeFilters();
+            }
+
             // Recalculate coefficients if sample rate changed dynamically
             float currentSampleRate = 1f / dt;
             if (Mathf.Abs(currentSampleRate - _lastSampleRate) > 1.0f)
