@@ -157,21 +157,59 @@ namespace Acrophobia.Narration
 
                 _text = obj.GetComponent<TextMeshProUGUI>();
                 if (_text == null) _text = obj.AddComponent<TextMeshProUGUI>();
-
-                _text.fontSize = 46f;
-                _text.alignment = TextAlignmentOptions.Center;
-                _text.color = SubtitleColour;
-                _text.richText = false;
-                _text.enableWordWrapping = true;
-
-                // A soft outline keeps the text legible against both sky and concrete
-                // without needing a panel background behind it.
-                _text.fontMaterial.EnableKeyword("OUTLINE_ON");
-                _text.outlineColor = new Color32(0, 0, 0, 190);
-                _text.outlineWidth = 0.18f;
             }
 
+            // Styling has to run whether or not we built the object. When the scene
+            // already has _text assigned, the branch above is skipped, and the outline
+            // that keeps the line readable was never being applied at all - which is
+            // why subtitles washed out against the city.
+            ApplySubtitleStyle();
+
             if (!string.IsNullOrEmpty(_pending)) _text.text = _pending;
+        }
+
+        /// <summary>
+        /// Legibility over a bright hazy skyline is the hard case: thin pale glyphs
+        /// disappear against it. An outline plus a dark underlay carries the text over
+        /// both sky and concrete without a backing panel stealing the view.
+        /// </summary>
+        private void ApplySubtitleStyle()
+        {
+            if (_text == null) return;
+
+            _text.fontSize = 46f;
+            _text.alignment = TextAlignmentOptions.Center;
+            _text.color = SubtitleColour;
+            _text.richText = false;
+            _text.enableWordWrapping = true;
+
+            var mat = _text.fontMaterial;
+            if (mat == null) return;
+
+            mat.EnableKeyword("OUTLINE_ON");
+            _text.outlineColor = new Color32(0, 0, 0, 215);
+            _text.outlineWidth = 0.22f;
+
+            // Must draw on top of the fade quad (3500) and ignore depth, or the line
+            // vanishes exactly when it matters most: held on a black screen during an
+            // interlude, which is the only context the participant gets for a cut.
+            mat.renderQueue = 3600;
+            if (mat.HasProperty("_ZTestMode"))
+                mat.SetFloat("_ZTestMode", (float)UnityEngine.Rendering.CompareFunction.Always);
+            if (mat.HasProperty("_ZTest"))
+                mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+
+            // Soft shadow underneath, so the line still reads where the outline alone
+            // sits on a similarly dark building edge.
+            mat.EnableKeyword("UNDERLAY_ON");
+            if (mat.HasProperty(ShaderUtilities.ID_UnderlayColor))
+                mat.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.65f));
+            if (mat.HasProperty(ShaderUtilities.ID_UnderlayOffsetX))
+                mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.12f);
+            if (mat.HasProperty(ShaderUtilities.ID_UnderlayOffsetY))
+                mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.12f);
+            if (mat.HasProperty(ShaderUtilities.ID_UnderlaySoftness))
+                mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.28f);
         }
     }
 }

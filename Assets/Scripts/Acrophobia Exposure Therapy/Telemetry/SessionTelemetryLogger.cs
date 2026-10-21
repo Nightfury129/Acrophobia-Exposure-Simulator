@@ -32,10 +32,7 @@ namespace Acrophobia.Telemetry
     public class SessionTelemetryLogger : MonoBehaviour
     {
         private const string TelemetryFolderName = "Telemetry";
-        private const int LineCapacity = 4096;
-
-        [Tooltip("Participant identifier for research categorization and export.")]
-        [SerializeField] private string _participantId = "P001";
+        private const int LineCapacity = 2048;
 
         [SerializeField, Range(1f, 72f)] private float _sampleRateHz = 10f;
 
@@ -57,7 +54,6 @@ namespace Acrophobia.Telemetry
         [SerializeField] private EdgeProximityTracker _edgeTracker;
         [SerializeField] private GazeAvoidanceDetector _gazeDetector;
         [SerializeField] private AdaptiveExposureFSM _fsm;
-        [SerializeField] private QuestDeviceTelemetryProvider _deviceTelemetry;
 
         private CsvLineBuffer _line;
         private StreamWriter _sampleWriter;
@@ -72,7 +68,6 @@ namespace Acrophobia.Telemetry
         private string _sessionId;
         private string _sampleFilePath;
         private string _eventFilePath;
-        private string _sessionStartUtc;
 
         // Session aggregates, reported in the events file on close.
         private float _maxHeightAboveGround;
@@ -82,16 +77,6 @@ namespace Acrophobia.Telemetry
         private int _sudsResponseCount;
         private int _samplesWritten;
         private Vector3 _sessionStartHeadPosition;
-
-        // Quest 2 and research aggregates
-        private float _peakTremorIntensity;
-        private float _tremorSum;
-        private int _tremorSampleCount;
-        private float _gazeAvoidanceSum;
-        private int _gazeSampleCount;
-        private float _initialSudsRating = -1f;
-        private float _finalSudsRating = -1f;
-        private readonly System.Collections.Generic.List<TelemetryExporter.SudsEventSummary> _sudsEventList = new System.Collections.Generic.List<TelemetryExporter.SudsEventSummary>();
 
         // Index 0 is unused so a tier number indexes directly.
         private const int MaxTiers = 8;
@@ -201,7 +186,6 @@ namespace Acrophobia.Telemetry
             if (_edgeTracker == null) _edgeTracker = FindAnyObjectByType<EdgeProximityTracker>();
             if (_gazeDetector == null) _gazeDetector = FindAnyObjectByType<GazeAvoidanceDetector>();
             if (_fsm == null) _fsm = FindAnyObjectByType<AdaptiveExposureFSM>();
-            if (_deviceTelemetry == null) _deviceTelemetry = FindAnyObjectByType<QuestDeviceTelemetryProvider>();
 
             if (_headTransform == null && _gazeDetector != null)
             {
@@ -233,7 +217,6 @@ namespace Acrophobia.Telemetry
 
             _sampleInterval = 1f / Mathf.Max(1f, _sampleRateHz);
             _sessionId = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
-            _sessionStartUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
 
             string folder = Path.Combine(Application.persistentDataPath, TelemetryFolderName);
 
@@ -277,15 +260,6 @@ namespace Acrophobia.Telemetry
             _retreatEventCount = 0;
             _sudsResponseCount = 0;
             _samplesWritten = 0;
-            _peakTremorIntensity = 0f;
-            _tremorSum = 0f;
-            _tremorSampleCount = 0;
-            _gazeAvoidanceSum = 0f;
-            _gazeSampleCount = 0;
-            _initialSudsRating = -1f;
-            _finalSudsRating = -1f;
-            _sudsEventList.Clear();
-
             Array.Clear(_dwellSecondsPerTier, 0, _dwellSecondsPerTier.Length);
             _observedTier = _fsm != null ? _fsm.CurrentTier : 1;
 
@@ -303,7 +277,7 @@ namespace Acrophobia.Telemetry
         }
 
         /// <summary>
-        /// Writes the session summary, flushes, closes and packages exports. Idempotent.
+        /// Writes the session summary, flushes and closes. Idempotent.
         /// </summary>
         public void EndSession(string reason = "ended")
         {
@@ -336,58 +310,6 @@ namespace Acrophobia.Telemetry
             _isLogging = false;
             FlushNow();
             CloseWriters();
-
-            ExportSessionData();
-        }
-
-        private void ExportSessionData()
-        {
-            try
-            {
-                var dwells = new System.Collections.Generic.List<TelemetryExporter.TierDwellMetric>();
-                for (int tier = 1; tier <= MaxTiers; tier++)
-                {
-                    if (_dwellSecondsPerTier[tier] > 0f)
-                    {
-                        dwells.Add(new TelemetryExporter.TierDwellMetric { tier = tier, dwellSeconds = _dwellSecondsPerTier[tier] });
-                    }
-                }
-
-                var metadata = new TelemetryExporter.SessionExportMetadata
-                {
-                    sessionId = _sessionId,
-                    participantId = string.IsNullOrEmpty(_participantId) ? "P001" : _participantId,
-                    deviceModel = SystemInfo.deviceModel,
-                    operatingSystem = SystemInfo.operatingSystem,
-                    unityVersion = Application.unityVersion,
-                    startTimeUtc = _sessionStartUtc ?? DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                    endTimeUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
-                    sessionDurationSeconds = SessionTime,
-                    sampleCount = _samplesWritten,
-                    highestTierReached = _observedTier,
-                    maxHeightAboveGroundM = _maxHeightAboveGround,
-                    maxPlanarDistanceM = _maxDistanceFromStart,
-                    totalDownwardGazeSeconds = _downwardGazeSeconds,
-                    retreatEventsCount = _retreatEventCount,
-                    sudsResponseCount = _sudsResponseCount,
-                    initialSudsRating = _initialSudsRating,
-                    finalSudsRating = _finalSudsRating,
-                    peakTremorIntensity = _peakTremorIntensity,
-                    meanTremorIntensity = _tremorSampleCount > 0 ? (_tremorSum / _tremorSampleCount) : 0f,
-                    meanGazeAvoidanceRatio = _gazeSampleCount > 0 ? (_gazeAvoidanceSum / _gazeSampleCount) : 0f,
-                    tierDwells = dwells.ToArray(),
-                    sudsEvents = _sudsEventList.ToArray()
-                };
-
-                TelemetryExporter.ExportSessionSummaryJson(metadata);
-                TelemetryExporter.ExportSessionFilesToDirectory(_sessionId, TelemetryExporter.GetExportDirectory(), out var files);
-
-                Debug.Log($"[SessionTelemetryLogger] Session {_sessionId} telemetry successfully packaged and exported! ({files.Count} files in {TelemetryExporter.GetExportDirectory()})", this);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[SessionTelemetryLogger] Failed during session export packaging: {ex.Message}", this);
-            }
         }
 
         private void Update()
@@ -503,16 +425,6 @@ namespace Acrophobia.Telemetry
         public void RecordSudsResponse(int rating, string promptContext)
         {
             _sudsResponseCount++;
-            if (_initialSudsRating < 0f) _initialSudsRating = rating;
-            _finalSudsRating = rating;
-            _sudsEventList.Add(new TelemetryExporter.SudsEventSummary
-            {
-                sessionTime = SessionTime,
-                tier = _observedTier,
-                promptContext = promptContext ?? "suds",
-                rating = rating
-            });
-
             RecordEvent("suds_response", _observedTier, promptContext, rating);
 
             // Pair the rating with a full signal snapshot at the same timestamp, so a
@@ -575,16 +487,6 @@ namespace Acrophobia.Telemetry
                 ? StateNames[stateIndex]
                 : "Unknown";
 
-            // Tremor & Gaze Avoidance Aggregates
-            float tremor = _tremorFilter != null ? _tremorFilter.TremorIntensity : 0f;
-            if (tremor > _peakTremorIntensity) _peakTremorIntensity = tremor;
-            _tremorSum += tremor;
-            _tremorSampleCount++;
-
-            float gazeAvoidance = _gazeDetector != null ? _gazeDetector.GazeAvoidanceRatio : 0f;
-            _gazeAvoidanceSum += gazeAvoidance;
-            _gazeSampleCount++;
-
             _line.Clear();
             _line.AppendField(SessionTime, 3);
             _line.AppendField(_observedTier);
@@ -598,62 +500,19 @@ namespace Acrophobia.Telemetry
             _line.AppendField(_headPoseSampler != null ? _headPoseSampler.LatestSpeed : 0f, 4);
             _line.AppendField(pitchDeg, 3);
 
-            // Head Dynamics
-            _line.AppendField(_deviceTelemetry != null ? _deviceTelemetry.HeadSpeed : 0f, 4);
-            _line.AppendField(_deviceTelemetry != null ? _deviceTelemetry.HeadAccelerationMagnitude : 0f, 4);
-            _line.AppendField(_deviceTelemetry != null ? _deviceTelemetry.HeadAngularVelocity.magnitude : 0f, 3);
-
-            // Gaze & Bio-metrics
             _line.AppendField(_gazeDetector != null ? _gazeDetector.GazeAngleWithDown : 0f, 3);
             _line.AppendField(_gazeDetector != null && _gazeDetector.IsLookingDown);
-            _line.AppendField(gazeAvoidance, 4);
+            _line.AppendField(_gazeDetector != null ? _gazeDetector.GazeAvoidanceRatio : 0f, 4);
             _line.AppendField(_downwardGazeSeconds, 3);
 
             _line.AppendField(_edgeTracker != null ? _edgeTracker.DistanceToEdge : 0f, 4);
             _line.AppendField(_edgeTracker != null && _edgeTracker.IsNearEdge);
             _line.AppendField(_edgeTracker != null ? _edgeTracker.HesitationIndex : 0f, 3);
 
-            _line.AppendField(tremor, 4);
+            _line.AppendField(_tremorFilter != null ? _tremorFilter.TremorIntensity : 0f, 4);
             _line.AppendField(_swayAnalyzer != null ? _swayAnalyzer.HorizontalSwayVelocity : 0f, 4);
             _line.AppendField(_swayAnalyzer != null ? _swayAnalyzer.CenterOfMassWander : 0f, 4);
             _line.AppendField(_swayAnalyzer != null && _swayAnalyzer.IsPosturalFrozen);
-
-            // Quest 2 Controllers
-            if (_deviceTelemetry != null)
-            {
-                Vector3 lPos = _deviceTelemetry.LeftControllerPosition;
-                _line.AppendField(lPos.x, 4);
-                _line.AppendField(lPos.y, 4);
-                _line.AppendField(lPos.z, 4);
-                _line.AppendField(_deviceTelemetry.LeftControllerVelocity.magnitude, 3);
-                _line.AppendField(_deviceTelemetry.LeftIndexTrigger, 3);
-                _line.AppendField(_deviceTelemetry.LeftGripTrigger, 3);
-                _line.AppendField(_deviceTelemetry.LeftThumbstick.x, 3);
-                _line.AppendField(_deviceTelemetry.LeftThumbstick.y, 3);
-                _line.AppendField(_deviceTelemetry.LeftPrimaryButton);
-
-                Vector3 rPos = _deviceTelemetry.RightControllerPosition;
-                _line.AppendField(rPos.x, 4);
-                _line.AppendField(rPos.y, 4);
-                _line.AppendField(rPos.z, 4);
-                _line.AppendField(_deviceTelemetry.RightControllerVelocity.magnitude, 3);
-                _line.AppendField(_deviceTelemetry.RightIndexTrigger, 3);
-                _line.AppendField(_deviceTelemetry.RightGripTrigger, 3);
-                _line.AppendField(_deviceTelemetry.RightThumbstick.x, 3);
-                _line.AppendField(_deviceTelemetry.RightThumbstick.y, 3);
-                _line.AppendField(_deviceTelemetry.RightPrimaryButton);
-
-                // Quest 2 System
-                _line.AppendField(_deviceTelemetry.CurrentFps, 1);
-                _line.AppendField(_deviceTelemetry.BatteryLevel, 2);
-                _line.AppendField(_deviceTelemetry.IsUserPresent);
-                _line.AppendField(_deviceTelemetry.IsHmdTrackingValid);
-            }
-            else
-            {
-                // Fallback zeros
-                for (int i = 0; i < 22; i++) _line.AppendField(0);
-            }
 
             _line.EndLine();
             _line.WriteTo(_sampleWriter);
@@ -673,9 +532,6 @@ namespace Acrophobia.Telemetry
             _line.AppendField("height_above_ground_m");
             _line.AppendField("head_speed_mps");
             _line.AppendField("head_pitch_deg");
-            _line.AppendField("head_linear_vel_mps");
-            _line.AppendField("head_accel_mps2");
-            _line.AppendField("head_ang_vel_degps");
             _line.AppendField("gaze_angle_from_down_deg");
             _line.AppendField("is_looking_down");
             _line.AppendField("gaze_avoidance_ratio");
@@ -687,30 +543,6 @@ namespace Acrophobia.Telemetry
             _line.AppendField("sway_velocity_mps");
             _line.AppendField("com_wander_m");
             _line.AppendField("is_postural_frozen");
-            // Quest 2 Controllers
-            _line.AppendField("l_ctrl_x");
-            _line.AppendField("l_ctrl_y");
-            _line.AppendField("l_ctrl_z");
-            _line.AppendField("l_ctrl_vel_mps");
-            _line.AppendField("l_trigger");
-            _line.AppendField("l_grip");
-            _line.AppendField("l_stick_x");
-            _line.AppendField("l_stick_y");
-            _line.AppendField("l_btn_x");
-            _line.AppendField("r_ctrl_x");
-            _line.AppendField("r_ctrl_y");
-            _line.AppendField("r_ctrl_z");
-            _line.AppendField("r_ctrl_vel_mps");
-            _line.AppendField("r_trigger");
-            _line.AppendField("r_grip");
-            _line.AppendField("r_stick_x");
-            _line.AppendField("r_stick_y");
-            _line.AppendField("r_btn_a");
-            // Quest 2 System
-            _line.AppendField("fps");
-            _line.AppendField("battery_pct");
-            _line.AppendField("is_user_present");
-            _line.AppendField("tracking_valid");
             _line.EndLine();
             _line.WriteTo(_sampleWriter);
         }

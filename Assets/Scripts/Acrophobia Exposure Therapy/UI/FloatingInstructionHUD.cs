@@ -49,11 +49,6 @@ namespace Acrophobia.UI
         [SerializeField] private TextMeshProUGUI _statusText;
         [SerializeField] private Image _statusIcon;
 
-        [Header("Distress Telemetry Integration")]
-        [SerializeField] private Acrophobia.Telemetry.SudsPromptController _sudsPrompt;
-        [SerializeField] private TextMeshProUGUI _distressPromptHint;
-        private Coroutine _distressBannerCoroutine;
-
         [Header("Runtime State")]
         [SerializeField] private bool _hasSessionStarted = false;
         [SerializeField] private int _currentTier = 1;
@@ -89,7 +84,6 @@ namespace Acrophobia.UI
         {
             ResolveTarget();
             EnsureUIHierarchy();
-            TryBindSudsPrompt();
             ShowStartScreen();
         }
 
@@ -98,15 +92,6 @@ namespace Acrophobia.UI
             ResolveTarget();
             SnapToTargetPosition();
             TryBindTelemetry();
-            TryBindSudsPrompt();
-        }
-
-        private void OnDestroy()
-        {
-            if (_sudsPrompt != null)
-            {
-                _sudsPrompt.OnSudsSubmitted -= HandleSudsSubmitted;
-            }
         }
 
         private void Update()
@@ -382,55 +367,6 @@ namespace Acrophobia.UI
             if (_swayAnalyzer == null) _swayAnalyzer = FindAnyObjectByType<PosturalSwayAnalyzer>();
         }
 
-        private void TryBindSudsPrompt()
-        {
-            if (_sudsPrompt == null)
-            {
-                _sudsPrompt = FindAnyObjectByType<Acrophobia.Telemetry.SudsPromptController>();
-            }
-
-            if (_sudsPrompt != null)
-            {
-                _sudsPrompt.OnSudsSubmitted -= HandleSudsSubmitted;
-                _sudsPrompt.OnSudsSubmitted += HandleSudsSubmitted;
-            }
-        }
-
-        private void HandleSudsSubmitted(int distressRating, string context)
-        {
-            ShowDistressLoggedConfirmation(distressRating);
-        }
-
-        /// <summary>
-        /// Displays transient visual feedback on the HUD that distress was recorded.
-        /// </summary>
-        public void ShowDistressLoggedConfirmation(int distressValue)
-        {
-            if (_distressBannerCoroutine != null)
-            {
-                StopCoroutine(_distressBannerCoroutine);
-            }
-            _distressBannerCoroutine = StartCoroutine(DistressConfirmationRoutine(distressValue));
-        }
-
-        private System.Collections.IEnumerator DistressConfirmationRoutine(int distressValue)
-        {
-            UpdateStatusDisplay(false, $"DISTRESS: {distressValue}/100 LOGGED", ColorComplete);
-
-            yield return new WaitForSeconds(3.5f);
-
-            if (_hasSessionStarted)
-            {
-                SetStatus(_isHesitating);
-            }
-            else
-            {
-                UpdateStatusDisplay(false, "STATUS: AWAITING START", ColorAwaiting);
-            }
-
-            _distressBannerCoroutine = null;
-        }
-
         private void ResolveTarget()
         {
             if (_centerEyeAnchor != null) return;
@@ -610,12 +546,6 @@ namespace Acrophobia.UI
                 "STATUS: AWAITING START", 18f, FontStyles.Bold, ColorAwaiting,
                 new Vector2(10f, 0f), new Vector2(270f, 30f), TextAlignmentOptions.Center);
             _statusText.enableWordWrapping = false;
-
-            // 8. Distress rating prompt callout at bottom of panel
-            _distressPromptHint = EnsureTextComponent(_mainPanel.transform, "DistressPromptHint",
-                "Press [Y] or [U] to Rate Distress (0-100)", 16f, FontStyles.Normal,
-                new Color(0.65f, 0.75f, 0.85f, 0.85f),
-                new Vector2(0f, -148f), new Vector2(500f, 24f), TextAlignmentOptions.Center);
         }
 
         private TextMeshProUGUI EnsureTextComponent(Transform parent, string name, string initialText,

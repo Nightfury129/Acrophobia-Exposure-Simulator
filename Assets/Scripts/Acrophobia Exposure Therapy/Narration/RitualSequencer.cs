@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Acrophobia.AdaptiveFSM;
 using Acrophobia.Locomotion;
+using Acrophobia.ProceduralEnvironment;
 using Acrophobia.Telemetry;
 
 namespace Acrophobia.Narration
@@ -36,7 +37,14 @@ namespace Acrophobia.Narration
             Interlude,
             WaitForApproach,
             SetProp,
-            Pause
+            Pause,
+
+            // Appended, never reordered: these map to serialized ints in the scene.
+            // Holds until the participant looks at a marked point and clicks it. The
+            // ritual interludes used to run straight into one another, which read as
+            // the screen blacking out every few seconds for no reason the participant
+            // could connect to anything they had done.
+            WaitForClick
         }
 
         [Serializable]
@@ -53,8 +61,19 @@ namespace Acrophobia.Narration
             [Tooltip("Seconds held. For an Interlude this is the time spent on black.")]
             public float Seconds = 3f;
 
-            [Tooltip("WaitForApproach: the place the participant has to reach.")]
+            [Tooltip("WaitForApproach / WaitForClick: the place the participant has to " +
+                     "reach, or the point they have to click.")]
             public Transform Marker;
+
+            [Tooltip("Same thing by name, looked up in whichever tier scene is loaded. " +
+                     "A Transform cannot be serialized across a scene boundary, so tiers " +
+                     "living in their own scene have to name their points instead.")]
+            public string MarkerName = "";
+
+            [Tooltip("WaitForClick: clicking this point advances to the next tier. This is " +
+                     "the way out of a level - the stairs, the door, the plank - so the " +
+                     "one interaction in a room is the one that takes you somewhere.")]
+            public bool AdvancesTierOnClick = false;
 
             [Tooltip("WaitForApproach: how close counts, in metres.")]
             public float Radius = 1.0f;
@@ -88,6 +107,18 @@ namespace Acrophobia.Narration
         [Tooltip("Seconds of black before the first fade-in, so a session opens on waking.")]
         [SerializeField, Range(0f, 4f)] private float _openingBlackSeconds = 1.2f;
 
+        [Tooltip("Silence every other audio source while an interlude plays, so the " +
+                 "street does not bleed through the black. The interlude itself is exempt.")]
+        [SerializeField] private bool _cutAmbienceDuringInterlude = true;
+
+        [Tooltip("Rig moved when an interlude beat carries a Marker. Resolved from the " +
+                 "teleport rig when left empty.")]
+        [SerializeField] private Transform _playerRig;
+
+        [Tooltip("Swaps the per-tier environment scene during the blackout. Optional - " +
+                 "without it every tier uses the environment built into this scene.")]
+        [SerializeField] private EnvironmentSceneLoader _envLoader;
+
         [SerializeField] private ScreenFader _fader;
         [SerializeField] private NarratorSubtitleView _subtitles;
         [SerializeField] private AudioSource _interludeSource;
@@ -100,6 +131,10 @@ namespace Acrophobia.Narration
         private int _runningTier = -1;
         private bool _firstRitualDone;
         private AdaptiveExposureFSM.ExposureState _lastState = AdaptiveExposureFSM.ExposureState.AwaitingStart;
+
+        // Volumes held while an interlude is playing, so ambience comes back exactly as
+        // it was rather than at some assumed default.
+        private readonly Dictionary<AudioSource, float> _silenced = new Dictionary<AudioSource, float>();
 
         public bool IsRunning => _running != null;
 
@@ -136,6 +171,10 @@ namespace Acrophobia.Narration
             if (_teleport == null) _teleport = FindAnyObjectByType<TeleportLocomotion>();
             if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
             if (_subtitles == null) _subtitles = FindAnyObjectByType<NarratorSubtitleView>();
+
+            // Same rig ExposureHeightController drives, so a placement and a tier offset
+            // never disagree about what "the player" is.
+            if (_playerRig == null && _teleport != null) _playerRig = _teleport.transform;
 
             if (_fader == null)
             {
@@ -204,12 +243,26 @@ namespace Acrophobia.Narration
                 ritual != null ? ritual.Label : "unnamed", 0f);
             OnRitualStarted?.Invoke(tier);
 
-            // Open on black so the session begins at the moment of waking.
-            if (_openingBlackSeconds > 0f && _fader != null)
+            // Open on black so the session begins at the moment of waking - but only when
+            // the ritual does not already start with an interlude. Every tier now opens
+            // with a transition interlude that runs its own black, and fading in here
+            // first showed the participant one second of the new tier height with no
+            // environment loaded yet: hanging in the air, then black again, then placed.
+            bool startsWithInterlude = ritual != null && ritual.Beats != null
+                                       && ritual.Beats.Length > 0
+                                       && ritual.Beats[0].Kind == BeatKind.Interlude;
+
+            if (_openingBlackSeconds > 0f && _fader != null && !startsWithInterlude)
             {
                 _fader.SetAlphaImmediate(1f);
                 yield return new WaitForSeconds(_openingBlackSeconds);
                 yield return _fader.FadeTo(0f, 1.2f);
+            }
+            else if (startsWithInterlude && _fader != null)
+            {
+                // Hold whatever black the FSM already raised, so there is no gap at all
+                // between the tier changing and the interlude taking over.
+                _fader.SetAlphaImmediate(1f);
             }
 
             if (ritual != null && ritual.Beats != null)
@@ -254,8 +307,33 @@ namespace Acrophobia.Narration
                     break;
 
                 case BeatKind.Interlude:
-                    // The whole trick: a scene implied by sound, never built.
+                    // The whole trick: a scene implied by sound, never built. The black is
+                    // also the only safe moment to move the participant - they cannot see
+                    // the world change, so a reposition reads as elapsed time rather than
+                    // teleportation, and nothing can strand them where the floor just was.
                     if (_fader != null) yield return _fader.FadeTo(1f, 0.7f);
+
+                    if (_cutAmbienceDuringInterlude) SilenceAmbience();
+
+                    // Swap the environment while nothing can be seen. A load takes as long
+                    // as it takes; the black is the only place that is free.
+                    if (_envLoader != null) yield return _envLoader.ApplyTier(_runningTier);
+
+                    // A Marker on an interlude means "you end up here", and only beats
+                    // that say so move anybody. The washing and coffee interludes carry
+                    // no marker: they are time passing in the same room, and re-placing
+                    // the participant on each one teleported them back to a spawn point
+                    // they were already standing on.
+                    bool relocates = beat.Marker != null || !string.IsNullOrEmpty(beat.MarkerName);
+                    if (relocates)
+                    {
+                        // A loaded tier scene carries its own spawn point and wins, since
+                        // the marker wired here belongs to an environment just hidden.
+                        Transform placeAt = (_envLoader != null && _envLoader.CurrentAnchor != null)
+                            ? _envLoader.CurrentAnchor
+                            : ResolveMarker(beat);
+                        if (placeAt != null) PlaceRigAt(placeAt);
+                    }
 
                     if (!string.IsNullOrEmpty(beat.Line)) _subtitles?.Show(beat.Line);
 
@@ -273,8 +351,49 @@ namespace Acrophobia.Narration
                     }
 
                     _subtitles?.Hide();
+                    RestoreAmbience();
                     if (_fader != null) yield return _fader.FadeTo(0f, 0.9f);
                     break;
+
+                case BeatKind.WaitForClick:
+                {
+                    Transform target = ResolveMarker(beat);
+                    if (target == null)
+                    {
+                        // Nothing to point at. Better to carry on than to strand the
+                        // participant in front of an invisible requirement.
+                        Debug.LogWarning("[Ritual] WaitForClick with no marker - skipping.", this);
+                        break;
+                    }
+
+                    if (!string.IsNullOrEmpty(beat.Line)) _subtitles?.Show(beat.Line);
+
+                    GameObject pip = SpawnIndicator(target.position);
+                    float held = 0f;
+                    float limit = Mathf.Max(5f, beat.TimeoutSeconds);
+                    bool clicked = false;
+
+                    while (!clicked && held < limit)
+                    {
+                        held += Time.deltaTime;
+                        if (pip != null) PulseIndicator(pip, held);
+                        if (ClickPressed() && IsLookingAt(target.position)) clicked = true;
+                        yield return null;
+                    }
+
+                    if (pip != null) Destroy(pip);
+                    _subtitles?.Hide();
+                    _logger?.RecordEvent(clicked ? "ritual_point_clicked" : "ritual_point_timeout",
+                                         _runningTier, target.name, held);
+
+                    // The way out. Clicking it is the participant choosing to go up, which
+                    // is the only route to a higher tier the brief allows.
+                    if (clicked && beat.AdvancesTierOnClick && _fsm != null)
+                    {
+                        _fsm.RequestAdvanceTier();
+                    }
+                    break;
+                }
 
                 case BeatKind.WaitForApproach:
                     if (!string.IsNullOrEmpty(beat.Line)) _subtitles?.Show(beat.Line);
@@ -310,6 +429,150 @@ namespace Acrophobia.Narration
                 _teleport.enabled = true;
                 _logger?.RecordEvent("movement_unlocked", _runningTier, "ritual_beat", 0f);
             }
+        }
+
+        /// <summary>
+        /// A beat's target, whether it was wired directly or has to be found by name in
+        /// whichever tier scene is currently loaded.
+        /// </summary>
+        private Transform ResolveMarker(Beat beat)
+        {
+            if (beat.Marker != null) return beat.Marker;
+            if (string.IsNullOrEmpty(beat.MarkerName)) return null;
+
+            var go = GameObject.Find(beat.MarkerName);
+            return go != null ? go.transform : null;
+        }
+
+        /// <summary>
+        /// The thing the participant is meant to click. Deliberately conspicuous: an
+        /// unmarked interaction in VR is an interaction nobody finds.
+        /// </summary>
+        private GameObject SpawnIndicator(Vector3 position)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = "__RitualPoint";
+            var col = go.GetComponent<Collider>();
+            if (col != null) Destroy(col);
+
+            go.transform.position = position;
+            go.transform.localScale = Vector3.one * 0.14f;
+
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            var mat = new Material(shader);
+            var warm = new Color(1.00f, 0.86f, 0.45f, 1f);
+            mat.color = warm;
+            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", warm);
+            // Over the top of the room so it never hides inside a wall or a worktop.
+            mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+            mat.renderQueue = 3550;
+
+            var rend = go.GetComponent<Renderer>();
+            rend.sharedMaterial = mat;
+            rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            rend.receiveShadows = false;
+            return go;
+        }
+
+        private static void PulseIndicator(GameObject pip, float t)
+        {
+            float s = 0.12f + Mathf.Sin(t * 4.5f) * 0.025f;
+            pip.transform.localScale = Vector3.one * s;
+        }
+
+        /// <summary>
+        /// Angle-based rather than a physics raycast: the indicator has no collider, and
+        /// a cone is far more forgiving than a ray when aiming with a tracked head.
+        /// </summary>
+        private bool IsLookingAt(Vector3 position)
+        {
+            if (_centerEyeAnchor == null) return true;
+
+            Vector3 toPoint = position - _centerEyeAnchor.position;
+            if (toPoint.sqrMagnitude > 400f) return false;          // beyond 20 m, no
+
+            float angle = Vector3.Angle(_centerEyeAnchor.forward, toPoint);
+            return angle <= 14f;
+        }
+
+        private static bool ClickPressed()
+        {
+            // Trigger on a headset. Button.One is the tier advance, so it is kept clear.
+            try
+            {
+                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)) return true;
+                if (OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger)) return true;
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            try
+            {
+                var mouse = UnityEngine.InputSystem.Mouse.current;
+                if (mouse != null && mouse.leftButton.wasPressedThisFrame) return true;
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null && kb.eKey.wasPressedThisFrame) return true;
+            }
+            catch (Exception) { }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetMouseButtonDown(0)) return true;
+                if (Input.GetKeyDown(KeyCode.E)) return true;
+            }
+            catch (Exception) { }
+#endif
+            return false;
+        }
+
+        /// <summary>
+        /// Mutes every audio source except the interlude itself, remembering what each
+        /// was set to. AudioListener.volume would be simpler but would also silence the
+        /// interlude clip, which is the one thing that has to be heard.
+        /// </summary>
+        private void SilenceAmbience()
+        {
+            if (_silenced.Count > 0) return;   // already down; never stack
+
+            foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+            {
+                if (src == null || src == _interludeSource) continue;
+                _silenced[src] = src.volume;
+                src.volume = 0f;
+            }
+        }
+
+        private void RestoreAmbience()
+        {
+            foreach (var kv in _silenced)
+            {
+                if (kv.Key != null) kv.Key.volume = kv.Value;
+            }
+            _silenced.Clear();
+        }
+
+        /// <summary>
+        /// Puts the participant at a marker. The rig is moved rather than the camera,
+        /// because the camera is driven by head tracking - so the rig is offset by the
+        /// gap between where the head currently is and where the marker wants it.
+        /// </summary>
+        private void PlaceRigAt(Transform marker)
+        {
+            if (marker == null || _playerRig == null) return;
+
+            Vector3 head = _centerEyeAnchor != null ? _centerEyeAnchor.position : _playerRig.position;
+
+            Vector3 delta = marker.position - head;
+            delta.y = 0f;                                   // horizontal correction only
+
+            Vector3 placed = _playerRig.position + delta;
+            placed.y = marker.position.y;                   // rig root sits at floor level
+            _playerRig.position = placed;
+
+            _logger?.RecordEvent("rig_placed", _runningTier, marker.name, 0f);
         }
 
         private void HandleTier(int tier)

@@ -25,6 +25,15 @@ namespace Acrophobia.Narration
         private Image _image;
         private float _alpha;
 
+        // VR fade surface. A ScreenSpaceOverlay canvas renders only to the desktop Game
+        // view and never reaches the headset, so the fader looked correct on the monitor
+        // while every transition appeared abrupt in the HMD. A quad parented to the eye
+        // and held just past the near plane works in both.
+        private Transform _quad;
+        private Renderer _quadRenderer;
+        private Material _quadMaterial;
+        private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
         public bool IsBlack => _alpha > 0.99f;
 
         public float Alpha => _alpha;
@@ -58,6 +67,63 @@ namespace Acrophobia.Narration
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
+
+            BuildQuad();
+        }
+
+        /// <summary>
+        /// The surface that actually blacks out a headset. Parented to the camera so it
+        /// rides the head, sat just beyond the near clip plane, and oversized so no
+        /// amount of FOV or IPD lets the edges creep into view.
+        /// </summary>
+        private void BuildQuad()
+        {
+            if (_quad != null) return;
+
+            Camera cam = Camera.main;
+            if (cam == null) cam = FindAnyObjectByType<Camera>();
+            if (cam == null) return;   // nothing to parent to yet; retried on next Build
+
+            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            go.name = "FadeQuad";
+            var col = go.GetComponent<Collider>();
+            if (col != null) Destroy(col);
+
+            go.transform.SetParent(cam.transform, false);
+            go.transform.localPosition = new Vector3(0f, 0f, cam.nearClipPlane + 0.02f);
+            go.transform.localRotation = Quaternion.identity;
+            go.transform.localScale = Vector3.one * 2.0f;
+
+            _quadRenderer = go.GetComponent<Renderer>();
+            _quadRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _quadRenderer.receiveShadows = false;
+
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) shader = Shader.Find("Unlit/Color");
+            _quadMaterial = new Material(shader);
+
+            // Transparent, depth-ignoring, drawn last. Without ZTest Always the quad can
+            // lose to anything the near plane is already intersecting.
+            _quadMaterial.SetFloat("_Surface", 1f);
+            _quadMaterial.SetFloat("_Blend", 0f);
+            _quadMaterial.SetFloat("_ZWrite", 0f);
+            _quadMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+            _quadMaterial.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            _quadMaterial.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            _quadMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            _quadMaterial.DisableKeyword("_ALPHATEST_ON");
+            // Below the subtitle panel, which sits at 3600 and has to stay readable on
+            // top of the black - the whole point of holding black is the line you show
+            // during it. Still above ordinary transparent geometry.
+            _quadMaterial.renderQueue = 3500;
+            _quadMaterial.color = new Color(0f, 0f, 0f, 0f);
+            if (_quadMaterial.HasProperty(BaseColorId))
+                _quadMaterial.SetColor(BaseColorId, new Color(0f, 0f, 0f, 0f));
+
+            _quadRenderer.sharedMaterial = _quadMaterial;
+            _quadRenderer.enabled = false;
+
+            _quad = go.transform;
         }
 
         public IEnumerator FadeTo(float target, float seconds = -1f)
@@ -99,6 +165,21 @@ namespace Acrophobia.Narration
             if (_canvas != null)
             {
                 _canvas.enabled = _alpha > 0.001f;
+            }
+
+            // The headset only ever sees this one.
+            if (_quad == null) BuildQuad();
+
+            if (_quadMaterial != null)
+            {
+                var c = new Color(0f, 0f, 0f, _alpha);
+                _quadMaterial.color = c;
+                if (_quadMaterial.HasProperty(BaseColorId)) _quadMaterial.SetColor(BaseColorId, c);
+            }
+
+            if (_quadRenderer != null)
+            {
+                _quadRenderer.enabled = _alpha > 0.001f;
             }
         }
     }

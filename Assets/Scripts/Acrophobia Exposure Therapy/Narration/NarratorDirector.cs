@@ -68,7 +68,14 @@ namespace Acrophobia.Narration
             [Tooltip("Fire at most once per session.")]
             public bool OnceOnly = true;
 
+            [Tooltip("For repeatable cues: seconds before this one may fire again. The " +
+                     "global minimum gap only spaces out different cues; without this a " +
+                     "repeatable cue whose condition stays true repeats until it stops " +
+                     "being a remark and becomes nagging.")]
+            public float RepeatCooldownSeconds = 120f;
+
             [NonSerialized] public bool HasFired;
+            [NonSerialized] public float LastFiredAt = -9999f;
         }
 
         [SerializeField] private Cue[] _cues = Array.Empty<Cue>();
@@ -314,6 +321,16 @@ namespace Acrophobia.Narration
                 if (c.OnceOnly && c.HasFired) continue;
                 if (c.TierFilter != 0 && c.TierFilter != tier) continue;
                 if (string.IsNullOrEmpty(c.Line)) continue;
+
+                // Repeatable cues need their own cooldown. Gaze avoidance is true for as
+                // long as the participant is not looking down over an edge - which indoors
+                // is permanently - so the condition re-arms every few seconds and the line
+                // lands over and over. It is meant to be an occasional dry aside.
+                if (!c.OnceOnly && Time.time - c.LastFiredAt < c.RepeatCooldownSeconds) continue;
+
+                // Claim the slot at queue time, not at speak time: a cue can sit in the
+                // queue while its condition keeps re-firing and be enqueued repeatedly.
+                c.LastFiredAt = Time.time;
 
                 _queue.Enqueue(c);
             }

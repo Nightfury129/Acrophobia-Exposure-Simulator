@@ -154,6 +154,17 @@ namespace Acrophobia.ProceduralEnvironment
             tier = Mathf.Clamp(tier, 1, 5);
             _currentTier = tier;
 
+            // The catwalk has been replaced by a per-tier outdoor space, so this object
+            // is normally inactive. The FSM still calls SetTier on every tier change,
+            // and the railing, width and glass animators below all StartCoroutine -
+            // which throws on an inactive GameObject, once per call. Record the tier so
+            // the state stays truthful if the catwalk is ever switched back on, then
+            // leave the animation alone.
+            if (!gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
             ResolveReferences();
             InitializeBaselines();
             EnsureCornerCables();

@@ -8,6 +8,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Acrophobia Exposure Therapy/Exposure_Therapy.unity
     guid: b571d44558b81ea48ba2f30352d21fd8
+  - enabled: 1
+    path: Assets/Scenes/Acrophobia Exposure Therapy/Environments/Env_Tier2_Office.unity
+    guid: eefc50313796a274f9834a4b39963732
+  - enabled: 1
+    path: Assets/Scenes/Acrophobia Exposure Therapy/Environments/Env_Tier3_UnfinishedFloor.unity
+    guid: fee1a5422e9b9824e8d545be705e58f3
+  - enabled: 1
+    path: Assets/Scenes/Acrophobia Exposure Therapy/Environments/Env_Tier4_Stairwell.unity
+    guid: bb9b1f863a1ca344a9e035e94d3f07d4
+  - enabled: 1
+    path: Assets/Scenes/Acrophobia Exposure Therapy/Environments/Env_Tier5_Rooftop.unity
+    guid: 5fe726d87d253ef469133b7ba59ea15d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ef9db6fb712a920459e61c337b27054c, type: 2}

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using Acrophobia.Narration;
 using UnityEngine;
 using Acrophobia.UI;
 using Acrophobia.ProceduralEnvironment;
@@ -39,6 +41,9 @@ namespace Acrophobia.AdaptiveFSM
         [SerializeField] private TremorBandFilter _tremorFilter;
         [SerializeField] private PosturalSwayAnalyzer _swayAnalyzer;
         [SerializeField] private EdgeProximityTracker _edgeTracker;
+
+        [Tooltip("Faded to black before a tier change, so nothing of the move is seen.")]
+        [SerializeField] private ScreenFader _fader;
         [SerializeField] private GazeAvoidanceDetector _gazeDetector;
 
         [Header("Adaptive Thresholds")]
@@ -74,6 +79,10 @@ namespace Acrophobia.AdaptiveFSM
         [SerializeField, Range(0f, 10f)] private float _autoStartSeconds = 1.0f;
 
         private float _awaitingTimer;
+
+        // Held while a tier change is running behind the black, so a second press
+        // cannot start a new one on top of it.
+        private Coroutine _transition;
         [SerializeField] private bool _hasJerkedThisTier = false;
 
         // Current telemetry cache
@@ -193,6 +202,7 @@ namespace Acrophobia.AdaptiveFSM
             if (_tremorFilter == null) _tremorFilter = FindAnyObjectByType<TremorBandFilter>();
             if (_swayAnalyzer == null) _swayAnalyzer = FindAnyObjectByType<PosturalSwayAnalyzer>();
             if (_edgeTracker == null) _edgeTracker = FindAnyObjectByType<EdgeProximityTracker>();
+            if (_fader == null) _fader = FindAnyObjectByType<ScreenFader>();
             if (_gazeDetector == null) _gazeDetector = FindAnyObjectByType<GazeAvoidanceDetector>();
         }
 
@@ -340,10 +350,34 @@ namespace Acrophobia.AdaptiveFSM
         {
             if (_currentState != ExposureState.Exposing)
             {
+                // Silently ignoring this is indistinguishable from a dead key, which has
+                // already cost one test run. Say which state refused it.
+                Debug.Log("[FSM] Advance ignored - state is " + _currentState
+                          + ", not Exposing. Tier stays at " + _currentTier + ".", this);
                 return;
             }
 
-            AdvanceToNextTier();
+            if (_transition != null) return;   // already mid-transition
+            _transition = StartCoroutine(BehindBlack(AdvanceToNextTier));
+        }
+
+        /// <summary>
+        /// Runs a tier change with the screen already black.
+        ///
+        /// Everything downstream of a tier change moves the world: the height controller
+        /// repositions the platform and the rig the instant the event fires. If the fade
+        /// starts afterwards the participant watches the new place arrive, then watches
+        /// it go black, then gets put down somewhere else - three separate jolts where
+        /// there should be none. Going black first makes all of it invisible.
+        /// </summary>
+        private IEnumerator BehindBlack(Action work)
+        {
+            if (_fader != null) yield return _fader.FadeTo(1f, 0.45f);
+
+            work?.Invoke();
+
+            // The interlude that follows holds the black, swaps the scene and lifts it.
+            _transition = null;
         }
 
         /// <summary>
@@ -368,6 +402,12 @@ namespace Acrophobia.AdaptiveFSM
                 return;
             }
 
+            if (_transition != null) return;
+            _transition = StartCoroutine(BehindBlack(StepBackNow));
+        }
+
+        private void StepBackNow()
+        {
             _currentTier--;
             _currentState = ExposureState.Exposing;
 
@@ -550,14 +590,19 @@ namespace Acrophobia.AdaptiveFSM
             }
             catch (Exception) { }
 
+            // N / B duplicate the arrow keys because the XR Simulator claims the arrow
+            // keys to pitch and yaw the simulated headset - pressing Up there looks up
+            // and the key never reaches us. Letter keys are left alone by the simulator,
+            // and avoid W/A/S/D/Q/E/Shift, which FlatModeInspector uses to fly the
+            // free camera. On a headset this changes nothing: Button.One still advances.
 #if ENABLE_INPUT_SYSTEM
             try
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
                 if (kb != null)
                 {
-                    if (kb.upArrowKey.wasPressedThisFrame) advance = true;
-                    if (kb.downArrowKey.wasPressedThisFrame) stepBack = true;
+                    if (kb.upArrowKey.wasPressedThisFrame || kb.nKey.wasPressedThisFrame) advance = true;
+                    if (kb.downArrowKey.wasPressedThisFrame || kb.bKey.wasPressedThisFrame) stepBack = true;
                     if (kb.escapeKey.wasPressedThisFrame) endSession = true;
                 }
             }
@@ -567,8 +612,8 @@ namespace Acrophobia.AdaptiveFSM
 #if ENABLE_LEGACY_INPUT_MANAGER
             try
             {
-                if (Input.GetKeyDown(KeyCode.UpArrow)) advance = true;
-                if (Input.GetKeyDown(KeyCode.DownArrow)) stepBack = true;
+                if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.N)) advance = true;
+                if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.B)) stepBack = true;
                 if (Input.GetKeyDown(KeyCode.Escape)) endSession = true;
             }
             catch (Exception) { }

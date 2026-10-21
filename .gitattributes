@@ -18,3 +18,7 @@ Assets/Textures/** !filter !diff !merge
 
 # Ritual audio: ~25 MB total, and GitHub refuses new LFS objects on a public fork.
 Assets/Audio/** !filter !diff !merge
+
+# PolyHaven textures live beside the scene that uses them and are small (~21 MB).
+# GitHub refuses new LFS objects on a public fork, so these stay plain blobs.
+Assets/Scenes/**/Textures/PolyHaven/** !filter !diff !merge
