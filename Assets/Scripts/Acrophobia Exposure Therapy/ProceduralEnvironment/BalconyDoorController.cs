@@ -102,7 +102,7 @@ namespace Acrophobia.ProceduralEnvironment
                 return;
             }
 
-            _closedRotation = _doorPanel.localRotation;
+            _closedRotation = transform.localRotation;
             _openRotation = _closedRotation * Quaternion.Euler(0f, -_openAngle, 0f);
             _capturedRotations = true;
         }
@@ -183,18 +183,18 @@ namespace Acrophobia.ProceduralEnvironment
         {
             _isSwinging = true;
 
-            Quaternion from = _doorPanel.localRotation;
+            Quaternion from = transform.localRotation;
             float elapsed = 0f;
 
             while (elapsed < _swingSeconds)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / _swingSeconds));
-                _doorPanel.localRotation = Quaternion.Slerp(from, target, t);
+                transform.localRotation = Quaternion.Slerp(from, target, t);
                 yield return null;
             }
 
-            _doorPanel.localRotation = target;
+            transform.localRotation = target;
             _isSwinging = false;
         }
 

@@ -11,9 +11,18 @@
 /[Uu]ser[Ss]ettings/
 /[Mm]emoryCaptures/
 /[Pp]rofilerCaptures/
+.utmp/
+/[Uu]tmp/
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
+
+# Unity crash recovery files
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
+
+# Meta XR / Oculus build config cache
+/[Aa]ssets/[Rr]esources/OVRBuildConfig.asset*
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*

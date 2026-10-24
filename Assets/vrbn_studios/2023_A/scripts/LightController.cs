@@ -26,7 +26,7 @@ public class LightController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        emissionControllers = FindObjectsOfType<EmissionController>();
+        emissionControllers = Object.FindObjectsByType<EmissionController>(FindObjectsSortMode.None);
     }
 
     void setEnableLights(bool lights)

@@ -111,7 +111,9 @@ namespace Acrophobia.Locomotion
         {
             try
             {
-                if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).magnitude > 0.6f) return true;
+                Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+                Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
+                if (leftStick.magnitude > 0.5f || rightStick.magnitude > 0.5f) return true;
             }
             catch (Exception) { }
 

@@ -162,7 +162,7 @@ namespace Acrophobia.Narration
                 _text.alignment = TextAlignmentOptions.Center;
                 _text.color = SubtitleColour;
                 _text.richText = false;
-                _text.enableWordWrapping = true;
+                _text.textWrappingMode = TextWrappingModes.Normal;
 
                 // A soft outline keeps the text legible against both sky and concrete
                 // without needing a panel background behind it.

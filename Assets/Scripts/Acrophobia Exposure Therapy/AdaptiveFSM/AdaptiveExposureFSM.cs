@@ -54,8 +54,10 @@ namespace Acrophobia.AdaptiveFSM
         [Tooltip("Seconds required in steady calm state to complete each tier.")]
         [SerializeField] private float _targetTierCalmSeconds = 30.0f;
 
+#pragma warning disable 0414
         [Tooltip("Decay multiplier per second applied to calm timer when hesitation/tremor is detected.")]
         [SerializeField, Range(0.1f, 2.0f)] private float _calmDecayRate = 0.5f;
+#pragma warning restore 0414
 
         [Tooltip("Seconds of steady calm required to recover from a safety intervention.")]
         [SerializeField] private float _safetyRecoverySeconds = 5.0f;
@@ -74,7 +76,9 @@ namespace Acrophobia.AdaptiveFSM
         [SerializeField, Range(0f, 10f)] private float _autoStartSeconds = 1.0f;
 
         private float _awaitingTimer;
+#pragma warning disable 0414
         [SerializeField] private bool _hasJerkedThisTier = false;
+#pragma warning restore 0414
 
         // Current telemetry cache
         [SerializeField] private float _liveTremor = 0f;
@@ -239,7 +243,7 @@ namespace Acrophobia.AdaptiveFSM
         private void UpdateAwaitingStart()
         {
             // If the user presses space, enter, or VR button, start the session
-            bool startPressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return);
+            bool startPressed = false;
 #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Keyboard.current != null &&
                 (UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame ||
@@ -247,6 +251,16 @@ namespace Acrophobia.AdaptiveFSM
             {
                 startPressed = true;
             }
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+                {
+                    startPressed = true;
+                }
+            }
+            catch (Exception) { }
 #endif
             try
             {

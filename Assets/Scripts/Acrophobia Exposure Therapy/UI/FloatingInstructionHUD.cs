@@ -609,7 +609,7 @@ namespace Acrophobia.UI
             _statusText = EnsureTextComponent(statusObj.transform, "StatusText",
                 "STATUS: AWAITING START", 18f, FontStyles.Bold, ColorAwaiting,
                 new Vector2(10f, 0f), new Vector2(270f, 30f), TextAlignmentOptions.Center);
-            _statusText.enableWordWrapping = false;
+            _statusText.textWrappingMode = TextWrappingModes.NoWrap;
 
             // 8. Distress rating prompt callout at bottom of panel
             _distressPromptHint = EnsureTextComponent(_mainPanel.transform, "DistressPromptHint",
@@ -646,7 +646,7 @@ namespace Acrophobia.UI
             tmp.fontStyle = style;
             tmp.color = color;
             tmp.alignment = alignment;
-            tmp.enableWordWrapping = true;
+            tmp.textWrappingMode = TextWrappingModes.Normal;
             tmp.raycastTarget = false;
 
             return tmp;
