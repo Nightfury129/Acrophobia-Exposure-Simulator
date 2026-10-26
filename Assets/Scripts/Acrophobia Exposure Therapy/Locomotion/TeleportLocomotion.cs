@@ -23,6 +23,9 @@ namespace Acrophobia.Locomotion
     {
         private const int ArcSampleCount = 24;
 
+        [Tooltip("Enable thumbstick aim for arc teleportation. Keep false when using JoystickLocomotion.")]
+        [SerializeField] private bool _enableTeleportAim = false;
+
         [SerializeField, Range(2f, 20f)] private float _maxRange = 8f;
 
         [Tooltip("Maximum floor slope in degrees that still counts as a valid landing.")]
@@ -109,6 +112,8 @@ namespace Acrophobia.Locomotion
 
         private bool ReadAimHeld()
         {
+            if (!_enableTeleportAim) return false;
+
             try
             {
                 if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).magnitude > 0.6f) return true;

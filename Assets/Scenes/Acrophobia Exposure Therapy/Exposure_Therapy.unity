@@ -1003,6 +1003,7 @@ GameObject:
   - component: {fileID: 83859216}
   - component: {fileID: 83859215}
   - component: {fileID: 83859217}
+  - component: {fileID: 83859218}
   m_Layer: 0
   m_Name: '[BuildingBlock] Camera Rig'
   m_TagString: Untagged
@@ -1185,6 +1186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b275e75a3a7ac040b7315fb2fe58521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Locomotion.TeleportLocomotion
+  _enableTeleportAim: 0
   _maxRange: 8
   _maxLandingSlope: 30
   _requiredClearance: 1.7
@@ -1238,6 +1240,28 @@ MonoBehaviour:
   _lookSensitivity: 2.5
   _eyeHeight: 1.65
   _requireRightMouseToLook: 1
+--- !u!114 &83859218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83859207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac20e5e31100c4149be7b73d270a6f92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Acrophobia.Locomotion.JoystickLocomotion
+  _enableMovement: 1
+  _walkSpeed: 1.8
+  _sprintSpeed: 3
+  _deadzone: 0.15
+  _enableTurning: 1
+  _snapTurn: 1
+  _snapTurnAngle: 45
+  _smoothTurnSpeed: 75
+  _centerEyeAnchor: {fileID: 1341198549}
+  _characterController: {fileID: 83859214}
 --- !u!1 &97279295
 GameObject:
   m_ObjectHideFlags: 0
