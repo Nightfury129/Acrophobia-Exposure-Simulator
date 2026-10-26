@@ -57,6 +57,19 @@ namespace Acrophobia.Locomotion
         [Tooltip("How quickly the body settles onto a new floor height, in metres per second.")]
         [SerializeField, Range(0.5f, 20f)] private float _floorSettleSpeed = 6f;
 
+        [Header("Thumbstick Locomotion")]
+        [Tooltip("Enable continuous thumbstick movement and rotation so physical walking is not required.")]
+        [SerializeField] private bool _enableThumbstickLocomotion = true;
+
+        [Tooltip("Walking speed in metres per second.")]
+        [SerializeField, Range(0.5f, 5.0f)] private float _moveSpeed = 2.2f;
+
+        [Tooltip("Turning speed in degrees per second.")]
+        [SerializeField, Range(30f, 180f)] private float _turnSpeed = 80.0f;
+
+        [Tooltip("Deadzone for thumbstick input.")]
+        [SerializeField, Range(0.05f, 0.5f)] private float _thumbstickDeadzone = 0.18f;
+
         [SerializeField] private Transform _centerEyeAnchor;
 
         private const int OverlapBufferSize = 8;
@@ -133,6 +146,7 @@ namespace Acrophobia.Locomotion
                 if (_centerEyeAnchor == null) return;
             }
 
+            ProcessThumbstickLocomotion();
             SyncCapsuleToHead();
             UpdateFloorBeneathFeet();
 
@@ -147,6 +161,129 @@ namespace Acrophobia.Locomotion
             }
 
             SettleOntoFloor();
+        }
+
+        /// <summary>
+        /// Reads thumbstick and keyboard inputs to provide smooth continuous translation and rotation.
+        /// Eliminates the need for physical room-scale walking.
+        /// </summary>
+        private void ProcessThumbstickLocomotion()
+        {
+            if (!_enableThumbstickLocomotion || _characterController == null || _centerEyeAnchor == null)
+            {
+                return;
+            }
+
+            // 1. Read translation inputs (Left Thumbstick / WASD)
+            Vector2 moveInput = Vector2.zero;
+
+            try
+            {
+                moveInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            if (moveInput.sqrMagnitude < 0.01f)
+            {
+                var gp = UnityEngine.InputSystem.Gamepad.current;
+                if (gp != null)
+                {
+                    Vector2 stick = gp.leftStick.ReadValue();
+                    if (stick.sqrMagnitude > moveInput.sqrMagnitude) moveInput = stick;
+                }
+
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null)
+                {
+                    float x = 0f;
+                    float y = 0f;
+                    if (kb.wKey.isPressed) y += 1f;
+                    if (kb.sKey.isPressed) y -= 1f;
+                    if (kb.aKey.isPressed) x -= 1f;
+                    if (kb.dKey.isPressed) x += 1f;
+                    Vector2 kbVec = new Vector2(x, y);
+                    if (kbVec.sqrMagnitude > moveInput.sqrMagnitude) moveInput = kbVec.normalized;
+                }
+            }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            if (moveInput.sqrMagnitude < 0.01f)
+            {
+                try
+                {
+                    float h = Input.GetAxisRaw("Horizontal");
+                    float v = Input.GetAxisRaw("Vertical");
+                    Vector2 leg = new Vector2(h, v);
+                    if (leg.sqrMagnitude > moveInput.sqrMagnitude) moveInput = leg.normalized;
+                }
+                catch (Exception) { }
+            }
+#endif
+
+            if (moveInput.magnitude > _thumbstickDeadzone)
+            {
+                Vector3 headFwd = _centerEyeAnchor.forward;
+                headFwd.y = 0f;
+                headFwd.Normalize();
+
+                Vector3 headRight = _centerEyeAnchor.right;
+                headRight.y = 0f;
+                headRight.Normalize();
+
+                Vector3 direction = (headFwd * moveInput.y + headRight * moveInput.x).normalized;
+                Vector3 displacement = direction * _moveSpeed * Time.deltaTime;
+                _characterController.Move(displacement);
+            }
+
+            // 2. Read turn inputs (Right Thumbstick / Arrow Keys / Q-E)
+            Vector2 turnInput = Vector2.zero;
+
+            try
+            {
+                turnInput = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            if (Mathf.Abs(turnInput.x) < 0.01f)
+            {
+                var gp = UnityEngine.InputSystem.Gamepad.current;
+                if (gp != null)
+                {
+                    Vector2 stick = gp.rightStick.ReadValue();
+                    if (Mathf.Abs(stick.x) > Mathf.Abs(turnInput.x)) turnInput = stick;
+                }
+
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null)
+                {
+                    float rx = 0f;
+                    if (kb.qKey.isPressed || kb.leftArrowKey.isPressed) rx -= 1f;
+                    if (kb.eKey.isPressed || kb.rightArrowKey.isPressed) rx += 1f;
+                    if (Mathf.Abs(rx) > Mathf.Abs(turnInput.x)) turnInput = new Vector2(rx, 0f);
+                }
+            }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            if (Mathf.Abs(turnInput.x) < 0.01f)
+            {
+                try
+                {
+                    if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.LeftArrow)) turnInput.x -= 1f;
+                    if (Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.RightArrow)) turnInput.x += 1f;
+                }
+                catch (Exception) { }
+            }
+#endif
+
+            if (Mathf.Abs(turnInput.x) > _thumbstickDeadzone)
+            {
+                float rotAngle = turnInput.x * _turnSpeed * Time.deltaTime;
+                transform.RotateAround(_centerEyeAnchor.position, Vector3.up, rotAngle);
+            }
         }
 
         /// <summary>

@@ -81,11 +81,11 @@ namespace Acrophobia.Telemetry
         private float _nextRepeatAt;
         private Coroutine _hapticCoroutine;
 
-        private static readonly Color ColorPanel = new Color(0.08f, 0.10f, 0.14f, 0.92f);
-        private static readonly Color ColorAccent = new Color(0.00f, 0.82f, 0.83f, 1f);
-        private static readonly Color ColorText = new Color(0.92f, 0.95f, 0.98f, 1f);
-        private static readonly Color ColorMuted = new Color(0.62f, 0.68f, 0.76f, 1f);
-        private static readonly Color ColorTrough = new Color(0.14f, 0.17f, 0.22f, 0.95f);
+        private static readonly Color ColorPanel = new Color(0.03f, 0.05f, 0.08f, 0.98f);
+        private static readonly Color ColorAccent = new Color(0.00f, 0.85f, 1.00f, 1f);
+        private static readonly Color ColorText = new Color(0.95f, 0.98f, 1.00f, 1f);
+        private static readonly Color ColorMuted = new Color(0.70f, 0.80f, 0.90f, 1f);
+        private static readonly Color ColorTrough = new Color(0.10f, 0.13f, 0.18f, 0.98f);
 
         // Distress Severity Colors (SUDS clinical gradient)
         private static readonly Color ColorMild = new Color(0.00f, 0.90f, 0.46f, 1f);     // Emerald (0-30)
@@ -323,8 +323,9 @@ namespace Acrophobia.Telemetry
             try
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
-                // [U] (SUDS) or [Tab] or [R] (Rate Distress) or [I] - NEVER use WASD (reserved for locomotion)
-                if (kb != null && (kb.uKey.wasPressedThisFrame ||
+                // [M] (Menu) or [U] (SUDS) or [Tab] or [R] (Rate Distress) or [I]
+                if (kb != null && (kb.mKey.wasPressedThisFrame ||
+                                   kb.uKey.wasPressedThisFrame ||
                                    kb.tabKey.wasPressedThisFrame ||
                                    kb.rKey.wasPressedThisFrame ||
                                    kb.iKey.wasPressedThisFrame))
@@ -338,7 +339,8 @@ namespace Acrophobia.Telemetry
 #if ENABLE_LEGACY_INPUT_MANAGER
             try
             {
-                if (Input.GetKeyDown(KeyCode.U) ||
+                if (Input.GetKeyDown(KeyCode.M) ||
+                    Input.GetKeyDown(KeyCode.U) ||
                     Input.GetKeyDown(KeyCode.Tab) ||
                     Input.GetKeyDown(KeyCode.R) ||
                     Input.GetKeyDown(KeyCode.I))
@@ -591,8 +593,9 @@ namespace Acrophobia.Telemetry
             try
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
-                // [Esc] or toggle keys [U] / [Tab] / [R] / [I] to dismiss
+                // [Esc] or toggle keys [M] / [U] / [Tab] / [R] / [I] to dismiss
                 if (kb != null && (kb.escapeKey.wasPressedThisFrame ||
+                                   kb.mKey.wasPressedThisFrame ||
                                    kb.uKey.wasPressedThisFrame ||
                                    kb.tabKey.wasPressedThisFrame ||
                                    kb.rKey.wasPressedThisFrame ||
@@ -608,6 +611,7 @@ namespace Acrophobia.Telemetry
             try
             {
                 if (Input.GetKeyDown(KeyCode.Escape) ||
+                    Input.GetKeyDown(KeyCode.M) ||
                     Input.GetKeyDown(KeyCode.U) ||
                     Input.GetKeyDown(KeyCode.Tab) ||
                     Input.GetKeyDown(KeyCode.R) ||
@@ -738,10 +742,9 @@ namespace Acrophobia.Telemetry
             canvasRect.sizeDelta = new Vector2(760f, 320f);
             canvasRect.localScale = Vector3.one * 0.001f; // 0.76 m x 0.32 m
 
-            if (gameObject.GetComponent<CanvasScaler>() == null)
-            {
-                gameObject.AddComponent<CanvasScaler>();
-            }
+            var scaler = gameObject.GetComponent<CanvasScaler>();
+            if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
+            scaler.dynamicPixelsPerUnit = 8f;
 
             if (_panel == null)
             {
@@ -760,6 +763,11 @@ namespace Acrophobia.Telemetry
                 Image bg = panelObj.GetComponent<Image>();
                 if (bg == null) bg = panelObj.AddComponent<Image>();
                 bg.color = ColorPanel;
+
+                var outline = panelObj.GetComponent<Outline>();
+                if (outline == null) outline = panelObj.AddComponent<Outline>();
+                outline.effectColor = new Color(0.00f, 0.85f, 1.00f, 0.85f);
+                outline.effectDistance = new Vector2(3f, -3f);
             }
 
             _questionText = EnsureText("QuestionText",

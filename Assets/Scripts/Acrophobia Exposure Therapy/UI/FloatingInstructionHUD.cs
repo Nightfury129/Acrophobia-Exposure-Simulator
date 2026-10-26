@@ -54,6 +54,16 @@ namespace Acrophobia.UI
         [SerializeField] private TextMeshProUGUI _distressPromptHint;
         private Coroutine _distressBannerCoroutine;
 
+        public enum HUDDisplayMode
+        {
+            TaskInstructions = 0,
+            DistressPrompt = 1,
+            Hidden = 2
+        }
+
+        [Header("Interchangeable HUD System")]
+        [SerializeField] private HUDDisplayMode _currentDisplayMode = HUDDisplayMode.TaskInstructions;
+
         [Header("Runtime State")]
         [SerializeField] private bool _hasSessionStarted = false;
         [SerializeField] private int _currentTier = 1;
@@ -61,15 +71,15 @@ namespace Acrophobia.UI
         [SerializeField] private float _targetProgressSeconds = 30f;
         [SerializeField] private bool _isHesitating = false;
 
-        // Visual Colors - High-contrast palette
+        // Visual Colors - High-contrast VR-optimized palette
         private static readonly Color ColorSteady = new Color(0.00f, 0.90f, 0.46f, 1f);      // Emerald Green (#00E676)
         private static readonly Color ColorHesitation = new Color(0.95f, 0.61f, 0.07f, 1f);   // Orange (#F39C12)
         private static readonly Color ColorAwaiting = new Color(0.40f, 0.78f, 1.00f, 1f);     // High-contrast Sky Blue (#66C7FF)
-        private static readonly Color ColorComplete = new Color(0.00f, 0.82f, 0.83f, 1f);     // Cyan (#00D2D3)
-        private static readonly Color ColorCyanAccent = new Color(0.00f, 0.82f, 0.83f, 1f);   // Bright Cyan
-        private static readonly Color ColorDarkBg = new Color(0.08f, 0.10f, 0.14f, 0.85f);    // Translucent dark slate
-        private static readonly Color ColorTroughBg = new Color(0.12f, 0.15f, 0.20f, 0.90f);  // Progress trough
-        private static readonly Color ColorBorderCyan = new Color(0.00f, 0.82f, 0.83f, 0.50f);// Outline border
+        private static readonly Color ColorComplete = new Color(0.00f, 0.85f, 1.00f, 1f);     // Cyan (#00E5FF)
+        private static readonly Color ColorCyanAccent = new Color(0.00f, 0.85f, 1.00f, 1f);   // Bright Neon Cyan
+        private static readonly Color ColorDarkBg = new Color(0.03f, 0.05f, 0.08f, 0.98f);    // Solid high-contrast dark slate
+        private static readonly Color ColorTroughBg = new Color(0.10f, 0.13f, 0.18f, 0.98f);  // Progress trough
+        private static readonly Color ColorBorderCyan = new Color(0.00f, 0.85f, 1.00f, 0.85f);// Outline border
 
         // Connected telemetry (optional auto-binding)
         private EdgeProximityTracker _edgeTracker;
@@ -81,9 +91,11 @@ namespace Acrophobia.UI
         public float TargetProgressSeconds => _targetProgressSeconds;
         public bool IsHesitating => _isHesitating;
         public bool ExternalFsmControlled { get; set; } = false;
+        public HUDDisplayMode CurrentDisplayMode => _currentDisplayMode;
 
         public event Action OnSessionStarted;
         public event Action OnExposureCompleted;
+        public event Action<HUDDisplayMode> OnHUDModeChanged;
 
         private void Awake()
         {
@@ -99,6 +111,7 @@ namespace Acrophobia.UI
             SnapToTargetPosition();
             TryBindTelemetry();
             TryBindSudsPrompt();
+            ApplyDisplayMode(_currentDisplayMode);
         }
 
         private void OnDestroy()
@@ -106,22 +119,27 @@ namespace Acrophobia.UI
             if (_sudsPrompt != null)
             {
                 _sudsPrompt.OnSudsSubmitted -= HandleSudsSubmitted;
+                _sudsPrompt.OnPromptOpened -= HandleSudsOpened;
+                _sudsPrompt.OnPromptDismissed -= HandleSudsDismissed;
             }
         }
 
         private void Update()
         {
-            // 1. Smooth lazy-follow movement
+            // 1. Check interchangeable HUD switch button input ([Y] / [B] / [Tab] / [H])
+            CheckHUDToggleInput();
+
+            // 2. Smooth lazy-follow movement
             UpdateLazyFollow();
 
-            // 2. Start screen initiation check
+            // 3. Start screen initiation check
             if (!_hasSessionStarted)
             {
                 CheckStartInput();
             }
             else
             {
-                // 3. Autonomous telemetry polling if present
+                // 4. Autonomous telemetry polling if present
                 PollTelemetry();
             }
         }
@@ -382,6 +400,147 @@ namespace Acrophobia.UI
             if (_swayAnalyzer == null) _swayAnalyzer = FindAnyObjectByType<PosturalSwayAnalyzer>();
         }
 
+        #region Interchangeable HUD System
+
+        private void CheckHUDToggleInput()
+        {
+            bool togglePressed = false;
+
+            try
+            {
+                // Meta Quest Touch VR Controllers:
+                // Primary/Secondary Thumbstick Click (L3 / R3) or Left Controller 'Y' button (Universal VR Menu)
+                if (OVRInput.GetDown(OVRInput.Button.Four) ||          // Y button (Left Controller)
+                    OVRInput.GetDown(OVRInput.RawButton.Y) ||
+                    OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick) ||   // Left stick press
+                    OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick))  // Right stick press
+                {
+                    togglePressed = true;
+                }
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            if (!togglePressed)
+            {
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                // [M] (Menu), [Tab], [U] (UI), [V] (View), [I] (Info)
+                // NEVER USE 'H' KEY: In Meta XR Simulator, 'H' is hardcoded to "Reset HMD Pose to Origin", which pushes the player backward!
+                if (kb != null && (kb.mKey.wasPressedThisFrame ||
+                                   kb.tabKey.wasPressedThisFrame ||
+                                   kb.uKey.wasPressedThisFrame ||
+                                   kb.vKey.wasPressedThisFrame ||
+                                   kb.iKey.wasPressedThisFrame))
+                {
+                    togglePressed = true;
+                }
+            }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            if (!togglePressed)
+            {
+                try
+                {
+                    if (Input.GetKeyDown(KeyCode.M) ||
+                        Input.GetKeyDown(KeyCode.Tab) ||
+                        Input.GetKeyDown(KeyCode.U) ||
+                        Input.GetKeyDown(KeyCode.V) ||
+                        Input.GetKeyDown(KeyCode.I))
+                    {
+                        togglePressed = true;
+                    }
+                }
+                catch (Exception) { }
+            }
+#endif
+
+            if (togglePressed)
+            {
+                CycleHUDDisplayMode();
+            }
+        }
+
+        public void CycleHUDDisplayMode()
+        {
+            HUDDisplayMode nextMode;
+            switch (_currentDisplayMode)
+            {
+                case HUDDisplayMode.TaskInstructions:
+                    nextMode = HUDDisplayMode.DistressPrompt;
+                    break;
+                case HUDDisplayMode.DistressPrompt:
+                    nextMode = HUDDisplayMode.Hidden;
+                    break;
+                default:
+                    nextMode = HUDDisplayMode.TaskInstructions;
+                    break;
+            }
+
+            ApplyDisplayMode(nextMode);
+        }
+
+        public void ApplyDisplayMode(HUDDisplayMode mode)
+        {
+            _currentDisplayMode = mode;
+            TryBindSudsPrompt();
+
+            switch (mode)
+            {
+                case HUDDisplayMode.TaskInstructions:
+                    if (_canvas != null) _canvas.enabled = true;
+                    if (_mainPanel != null) _mainPanel.gameObject.SetActive(true);
+                    if (_sudsPrompt != null && _sudsPrompt.IsOpen) _sudsPrompt.Dismiss();
+                    SnapToTargetPosition();
+                    break;
+
+                case HUDDisplayMode.DistressPrompt:
+                    if (_mainPanel != null) _mainPanel.gameObject.SetActive(false);
+                    if (_sudsPrompt != null)
+                    {
+                        if (!_sudsPrompt.IsOpen)
+                        {
+                            _sudsPrompt.Show("hud_switch");
+                        }
+                    }
+                    else
+                    {
+                        // Fallback if SUDS controller not found: keep Task HUD active
+                        if (_canvas != null) _canvas.enabled = true;
+                        if (_mainPanel != null) _mainPanel.gameObject.SetActive(true);
+                    }
+                    break;
+
+                case HUDDisplayMode.Hidden:
+                    if (_mainPanel != null) _mainPanel.gameObject.SetActive(false);
+                    if (_canvas != null) _canvas.enabled = false;
+                    if (_sudsPrompt != null && _sudsPrompt.IsOpen) _sudsPrompt.Dismiss();
+                    break;
+            }
+
+            OnHUDModeChanged?.Invoke(_currentDisplayMode);
+        }
+
+        private void HandleSudsOpened(string context)
+        {
+            // Guarantee exclusive display: hide Task HUD while SUDS prompt is active
+            if (_mainPanel != null) _mainPanel.gameObject.SetActive(false);
+            _currentDisplayMode = HUDDisplayMode.DistressPrompt;
+        }
+
+        private void HandleSudsDismissed(string context)
+        {
+            // Restore Task HUD after SUDS closes if not explicitly hidden
+            if (_currentDisplayMode == HUDDisplayMode.DistressPrompt)
+            {
+                _currentDisplayMode = HUDDisplayMode.TaskInstructions;
+                if (_mainPanel != null) _mainPanel.gameObject.SetActive(true);
+                if (_canvas != null) _canvas.enabled = true;
+            }
+        }
+
+        #endregion
+
         private void TryBindSudsPrompt()
         {
             if (_sudsPrompt == null)
@@ -393,6 +552,10 @@ namespace Acrophobia.UI
             {
                 _sudsPrompt.OnSudsSubmitted -= HandleSudsSubmitted;
                 _sudsPrompt.OnSudsSubmitted += HandleSudsSubmitted;
+                _sudsPrompt.OnPromptOpened -= HandleSudsOpened;
+                _sudsPrompt.OnPromptOpened += HandleSudsOpened;
+                _sudsPrompt.OnPromptDismissed -= HandleSudsDismissed;
+                _sudsPrompt.OnPromptDismissed += HandleSudsDismissed;
             }
         }
 
@@ -453,17 +616,17 @@ namespace Acrophobia.UI
             _canvas.renderMode = RenderMode.WorldSpace;
 
             RectTransform canvasRt = GetComponent<RectTransform>();
-            canvasRt.sizeDelta = new Vector2(850f, 350f);
-            canvasRt.localScale = Vector3.one * 0.001f; // 0.85m x 0.35m physical size
+            canvasRt.sizeDelta = new Vector2(860f, 380f);
+            canvasRt.localScale = Vector3.one * 0.001f; // 0.86m x 0.38m physical size
 
             CanvasScaler scaler = GetComponent<CanvasScaler>();
             if (scaler == null) scaler = gameObject.AddComponent<CanvasScaler>();
-            scaler.dynamicPixelsPerUnit = 4f;
+            scaler.dynamicPixelsPerUnit = 8f;
 
             GraphicRaycaster raycaster = GetComponent<GraphicRaycaster>();
             if (raycaster == null) gameObject.AddComponent<GraphicRaycaster>();
 
-            // 2. Main Background Panel (0.85m x 0.35m dark slate with 2px cyan outline)
+            // 2. Main Background Panel (0.86m x 0.38m solid dark slate with 3px cyan outline)
             Transform panelTrans = transform.Find("MainPanel");
             GameObject panelObj;
             if (panelTrans == null)
@@ -486,29 +649,29 @@ namespace Acrophobia.UI
             if (bg == null) bg = panelObj.AddComponent<Image>();
             bg.color = ColorDarkBg;
 
-            // 2px Subtle Cyan/Steel Outline
+            // 3px High-Contrast Cyan Outline
             Outline outline = panelObj.GetComponent<Outline>();
             if (outline == null) outline = panelObj.AddComponent<Outline>();
             outline.effectColor = ColorBorderCyan;
-            outline.effectDistance = new Vector2(2f, -2f);
+            outline.effectDistance = new Vector2(3f, -3f);
 
-            // 3. Header / Tier Banner: Font size 32, Bold, bright cyan/white: [ TIER 1: ENCLOSED LEDGE ]
+            // 3. Header / Tier Banner: Font size 34, Bold, bright neon cyan: [ TIER 1: ENCLOSED LEDGE ]
             _titleText = EnsureTextComponent(_mainPanel.transform, "TitleText", 
-                "[ TIER 1: ENCLOSED LEDGE ]", 32f, FontStyles.Bold, ColorCyanAccent,
-                new Vector2(0f, 115f), new Vector2(800f, 42f), TextAlignmentOptions.Center);
+                "[ TIER 1: ENCLOSED LEDGE ]", 34f, FontStyles.Bold, ColorCyanAccent,
+                new Vector2(0f, 125f), new Vector2(820f, 48f), TextAlignmentOptions.Center);
             _tierBannerText = _titleText;
 
-            // 4. Instruction Text: Font size 26, Bold, crisp white, centered
+            // 4. Instruction Text: Font size 28, Bold, crisp white, centered
             _instructionText = EnsureTextComponent(_mainPanel.transform, "InstructionText",
-                "Stand comfortably on the platform.\nPress [Space] or [A] to Start.", 26f, FontStyles.Bold, Color.white,
-                new Vector2(0f, 42f), new Vector2(780f, 75f), TextAlignmentOptions.Center);
+                "Stand comfortably on the platform.\nPress [Space] or [A] to Start.", 28f, FontStyles.Bold, Color.white,
+                new Vector2(0f, 48f), new Vector2(800f, 82f), TextAlignmentOptions.Center);
 
-            // 5. 30-Second Countdown Text: Font size 20, Bold, Calm Exposure: 0.0s / 30.0s
+            // 5. 30-Second Countdown Text: Font size 22, Bold, Calm Exposure: 0.0s / 30.0s
             _countdownText = EnsureTextComponent(_mainPanel.transform, "CountdownText",
-                "Calm Exposure: 0.0s / 30.0s", 20f, FontStyles.Bold, new Color(0.82f, 0.88f, 0.94f, 1f),
-                new Vector2(0f, -28f), new Vector2(700f, 26f), TextAlignmentOptions.Center);
+                "Calm Exposure: 0.0s / 30.0s", 22f, FontStyles.Bold, new Color(0.85f, 0.92f, 1.00f, 1f),
+                new Vector2(0f, -24f), new Vector2(720f, 30f), TextAlignmentOptions.Center);
 
-            // 6. Progress Bar (Trough + Emerald Fill): Prominent horizontal bar (Height = 16px, Width = 700px)
+            // 6. Progress Bar (Trough + Emerald Fill): Prominent horizontal bar (Height = 20px, Width = 720px)
             Transform troughTrans = _mainPanel.transform.Find("ProgressBarTrough");
             GameObject troughObj;
             if (troughTrans == null)
@@ -523,8 +686,8 @@ namespace Acrophobia.UI
 
             RectTransform trRt = troughObj.GetComponent<RectTransform>();
             if (trRt == null) trRt = troughObj.AddComponent<RectTransform>();
-            trRt.anchoredPosition = new Vector2(0f, -60f);
-            trRt.sizeDelta = new Vector2(700f, 16f);
+            trRt.anchoredPosition = new Vector2(0f, -56f);
+            trRt.sizeDelta = new Vector2(720f, 20f);
 
             Image trImg = troughObj.GetComponent<Image>();
             if (trImg == null) trImg = troughObj.AddComponent<Image>();
@@ -571,17 +734,17 @@ namespace Acrophobia.UI
 
             RectTransform statusRt = statusObj.GetComponent<RectTransform>();
             if (statusRt == null) statusRt = statusObj.AddComponent<RectTransform>();
-            statusRt.anchoredPosition = new Vector2(0f, -112f);
-            statusRt.sizeDelta = new Vector2(360f, 34f);
+            statusRt.anchoredPosition = new Vector2(0f, -102f);
+            statusRt.sizeDelta = new Vector2(380f, 36f);
 
             Image statusBg = statusObj.GetComponent<Image>();
             if (statusBg == null) statusBg = statusObj.AddComponent<Image>();
-            statusBg.color = new Color(0.12f, 0.16f, 0.22f, 0.90f);
+            statusBg.color = new Color(0.10f, 0.14f, 0.20f, 0.98f);
 
             Outline statusOutline = statusObj.GetComponent<Outline>();
             if (statusOutline == null) statusOutline = statusObj.AddComponent<Outline>();
-            statusOutline.effectColor = new Color(0.25f, 0.35f, 0.45f, 0.50f);
-            statusOutline.effectDistance = new Vector2(1f, -1f);
+            statusOutline.effectColor = new Color(0.00f, 0.85f, 1.00f, 0.60f);
+            statusOutline.effectDistance = new Vector2(1.5f, -1.5f);
 
             // Status Icon Circle
             Transform iconTrans = statusObj.transform.Find("StatusIcon");
@@ -598,8 +761,8 @@ namespace Acrophobia.UI
 
             RectTransform iconRt = iconObj.GetComponent<RectTransform>();
             if (iconRt == null) iconRt = iconObj.AddComponent<RectTransform>();
-            iconRt.anchoredPosition = new Vector2(-120f, 0f);
-            iconRt.sizeDelta = new Vector2(14f, 14f);
+            iconRt.anchoredPosition = new Vector2(-130f, 0f);
+            iconRt.sizeDelta = new Vector2(16f, 16f);
 
             _statusIcon = iconObj.GetComponent<Image>();
             if (_statusIcon == null) _statusIcon = iconObj.AddComponent<Image>();
@@ -607,15 +770,15 @@ namespace Acrophobia.UI
 
             // Status Text
             _statusText = EnsureTextComponent(statusObj.transform, "StatusText",
-                "STATUS: AWAITING START", 18f, FontStyles.Bold, ColorAwaiting,
-                new Vector2(10f, 0f), new Vector2(270f, 30f), TextAlignmentOptions.Center);
+                "STATUS: AWAITING START", 20f, FontStyles.Bold, ColorAwaiting,
+                new Vector2(10f, 0f), new Vector2(280f, 32f), TextAlignmentOptions.Center);
             _statusText.textWrappingMode = TextWrappingModes.NoWrap;
 
-            // 8. Distress rating prompt callout at bottom of panel
+            // 8. Interchangeable HUD Toggle Callout at bottom of panel
             _distressPromptHint = EnsureTextComponent(_mainPanel.transform, "DistressPromptHint",
-                "Press [Y] or [U] to Rate Distress (0-100)", 16f, FontStyles.Normal,
-                new Color(0.65f, 0.75f, 0.85f, 0.85f),
-                new Vector2(0f, -148f), new Vector2(500f, 24f), TextAlignmentOptions.Center);
+                "[M] / [Y] / [Tab] : Switch Menu (Tasks | Distress Rating | Clean View)", 18f, FontStyles.Bold,
+                new Color(0.40f, 0.78f, 1.00f, 1f),
+                new Vector2(0f, -148f), new Vector2(720f, 28f), TextAlignmentOptions.Center);
         }
 
         private TextMeshProUGUI EnsureTextComponent(Transform parent, string name, string initialText,

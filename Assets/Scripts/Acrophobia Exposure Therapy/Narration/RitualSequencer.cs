@@ -198,26 +198,76 @@ namespace Acrophobia.Narration
         private IEnumerator Play(int index, int tier)
         {
             _runningTier = tier;
-            TierRitual ritual = _rituals[index];
+            TierRitual ritual = _rituals != null && index < _rituals.Length ? _rituals[index] : null;
 
             _logger?.RecordEvent("ritual_started", tier,
                 ritual != null ? ritual.Label : "unnamed", 0f);
             OnRitualStarted?.Invoke(tier);
 
-            // Open on black so the session begins at the moment of waking.
-            if (_openingBlackSeconds > 0f && _fader != null)
+            // Hide subtitles and ensure clean screen - no blackouts or locking
+            _subtitles?.Hide();
+            if (_fader != null) _fader.SetAlphaImmediate(0f);
+            if (_teleport != null) _teleport.enabled = true;
+
+            // Wait for participant movement before triggering the atmospheric sound effect (e.g. coffee pour)
+            Vector3 startPos = _centerEyeAnchor != null ? _centerEyeAnchor.position : transform.position;
+            bool moved = false;
+
+            float waitTimeout = 120f;
+            float waitTimer = 0f;
+
+            while (!moved && waitTimer < waitTimeout)
             {
-                _fader.SetAlphaImmediate(1f);
-                yield return new WaitForSeconds(_openingBlackSeconds);
-                yield return _fader.FadeTo(0f, 1.2f);
+                waitTimer += Time.deltaTime;
+
+                if (_centerEyeAnchor != null && Vector3.Distance(_centerEyeAnchor.position, startPos) > 0.12f)
+                {
+                    moved = true;
+                    break;
+                }
+
+                try
+                {
+                    if (OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).sqrMagnitude > 0.04f ||
+                        OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).sqrMagnitude > 0.04f)
+                    {
+                        moved = true;
+                        break;
+                    }
+                }
+                catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null && (kb.wKey.isPressed || kb.sKey.isPressed || kb.aKey.isPressed || kb.dKey.isPressed))
+                {
+                    moved = true;
+                    break;
+                }
+#endif
+                yield return null;
             }
 
+            // Participant moved! Trigger the ambient morning / apartment sound effect (coffee, washing, etc.)
+            AudioClip clipToPlay = null;
             if (ritual != null && ritual.Beats != null)
             {
-                for (int i = 0; i < ritual.Beats.Length; i++)
+                for (int b = 0; b < ritual.Beats.Length; b++)
                 {
-                    yield return RunBeat(ritual.Beats[i]);
+                    if (ritual.Beats[b].Clip != null)
+                    {
+                        clipToPlay = ritual.Beats[b].Clip;
+                        break;
+                    }
                 }
+            }
+
+            if (clipToPlay != null && _interludeSource != null)
+            {
+                _interludeSource.clip = clipToPlay;
+                _interludeSource.volume = 0.85f;
+                _interludeSource.Play();
+                yield return new WaitForSeconds(Mathf.Min(clipToPlay.length, 7.0f));
             }
 
             _subtitles?.Hide();

@@ -60,7 +60,17 @@ namespace Acrophobia.ProceduralEnvironment
         [Tooltip("Transparent glass floor material (M_Catwalk_Glass).")]
         [SerializeField] private Material _glassMaterial;
 
-        [Tooltip("MeshRenderers whose materials will be swapped or faded.")]
+        [Header("Modular Mesh References")]
+        [Tooltip("Prefab containing modular Structure, Railings, and WalkingSurface (Catwalk_Wide_Rails).")]
+        [SerializeField] private GameObject _modularCatwalkPrefab;
+
+        [Tooltip("MeshRenderer for the walking surface/floor (fades to glass in Tier 5).")]
+        [SerializeField] private MeshRenderer _floorRenderer;
+
+        [Tooltip("MeshRenderers for structural frame, beams, and railings (always remain solid opaque metal).")]
+        [SerializeField] private MeshRenderer[] _frameRenderers;
+
+        [Tooltip("Legacy: MeshRenderers whose materials were previously swapped or faded.")]
         [SerializeField] private MeshRenderer[] _catwalkRenderers;
 
         [Header("Audio Sources & Clips")]
@@ -84,11 +94,11 @@ namespace Acrophobia.ProceduralEnvironment
         [SerializeField] private float _springStiffness = 180.0f;
         [SerializeField] private float _springDamping = 18.0f;
 
-        // Runtime Positions & Bases
-        private Vector3 _platformBasePos;
-        private Quaternion _platformBaseRot;
-        private Vector3 _frontRailingRaisedPos;
-        private Vector3 _frontRailingLoweredPos;
+        // Runtime Positions & Bases (Local Space relative to parent environment)
+        private Vector3 _platformBaseLocalPos;
+        private Quaternion _platformBaseLocalRot;
+        private Vector3 _frontRailingRaisedLocalPos;
+        private Vector3 _frontRailingLoweredLocalPos;
 
         // Dynamic State Variables
         private float _swayTimer = 0f;
@@ -254,7 +264,7 @@ namespace Acrophobia.ProceduralEnvironment
 
             if (immediate)
             {
-                _frontRailing.position = raised ? _frontRailingRaisedPos : _frontRailingLoweredPos;
+                _frontRailing.localPosition = raised ? _frontRailingRaisedLocalPos : _frontRailingLoweredLocalPos;
                 if (_frontRailingCollider != null)
                 {
                     _frontRailingCollider.enabled = raised;
@@ -268,8 +278,8 @@ namespace Acrophobia.ProceduralEnvironment
 
         private IEnumerator AnimateRailingRoutine(bool raised, float duration)
         {
-            Vector3 startPos = _frontRailing.position;
-            Vector3 targetPos = raised ? _frontRailingRaisedPos : _frontRailingLoweredPos;
+            Vector3 startPos = _frontRailing.localPosition;
+            Vector3 targetPos = raised ? _frontRailingRaisedLocalPos : _frontRailingLoweredLocalPos;
 
             // If raising, enable collider early
             if (raised && _frontRailingCollider != null)
@@ -282,11 +292,11 @@ namespace Acrophobia.ProceduralEnvironment
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
-                _frontRailing.position = Vector3.Lerp(startPos, targetPos, t);
+                _frontRailing.localPosition = Vector3.Lerp(startPos, targetPos, t);
                 yield return null;
             }
 
-            _frontRailing.position = targetPos;
+            _frontRailing.localPosition = targetPos;
 
             // If lowering, disable collider once below deck
             if (!raised && _frontRailingCollider != null)
@@ -348,17 +358,19 @@ namespace Acrophobia.ProceduralEnvironment
             float halfWidth = _currentWidth * 0.5f;
             float colliderThickness = 0.35f;
 
+            float baseX = _catwalkPlatform != null ? _catwalkPlatform.position.x : _platformBaseLocalPos.x;
+
             if (_leftRailingCollider != null)
             {
                 Vector3 p = _leftRailingCollider.position;
-                p.x = _platformBasePos.x - halfWidth - (colliderThickness * 0.5f);
+                p.x = baseX - halfWidth - (colliderThickness * 0.5f);
                 _leftRailingCollider.position = p;
             }
 
             if (_rightRailingCollider != null)
             {
                 Vector3 p = _rightRailingCollider.position;
-                p.x = _platformBasePos.x + halfWidth + (colliderThickness * 0.5f);
+                p.x = baseX + halfWidth + (colliderThickness * 0.5f);
                 _rightRailingCollider.position = p;
             }
 
@@ -414,13 +426,12 @@ namespace Acrophobia.ProceduralEnvironment
         {
             _currentFloorAlpha = alpha;
 
-            if (_catwalkRenderers == null || _catwalkRenderers.Length == 0)
+            if (_floorRenderer == null || _frameRenderers == null || _frameRenderers.Length == 0)
             {
                 ResolveReferences();
             }
-            if (_catwalkRenderers == null || _catwalkRenderers.Length == 0) return;
 
-            Material matToApply;
+            Material floorMatToApply;
             if (useGlass && _glassMaterial != null)
             {
                 if (_activeGlassMaterialInstance == null)
@@ -428,23 +439,31 @@ namespace Acrophobia.ProceduralEnvironment
                     _activeGlassMaterialInstance = new Material(_glassMaterial);
                     _activeGlassMaterialInstance.name = "M_Catwalk_Glass_DynamicInstance";
                 }
-                matToApply = _activeGlassMaterialInstance;
+                floorMatToApply = _activeGlassMaterialInstance;
+                CatwalkMaterialController.SetAlpha(floorMatToApply, alpha);
             }
             else
             {
-                matToApply = _opaqueCatwalkMaterial;
+                floorMatToApply = _opaqueCatwalkMaterial;
             }
 
-            if (matToApply != null)
+            // 1. Apply glass material ONLY to the walking surface / floor renderer
+            if (_floorRenderer != null && floorMatToApply != null)
             {
-                // Follow URP guidelines: always use GetColor/SetColor on _BaseColor
-                CatwalkMaterialController.SetAlpha(matToApply, alpha);
-
-                foreach (var mr in _catwalkRenderers)
+                if (_floorRenderer.sharedMaterial != floorMatToApply)
                 {
-                    if (mr != null && mr.sharedMaterial != matToApply)
+                    _floorRenderer.material = floorMatToApply;
+                }
+            }
+
+            // 2. Guarantee that structural frame, support struts, and side railings ALWAYS remain solid opaque steel
+            if (_opaqueCatwalkMaterial != null && _frameRenderers != null)
+            {
+                foreach (var mr in _frameRenderers)
+                {
+                    if (mr != null && mr != _floorRenderer && mr.sharedMaterial != _opaqueCatwalkMaterial)
                     {
-                        mr.material = matToApply;
+                        mr.material = _opaqueCatwalkMaterial;
                     }
                 }
             }
@@ -494,8 +513,8 @@ namespace Acrophobia.ProceduralEnvironment
 
                 if (!_isSwayActive && _catwalkPlatform != null)
                 {
-                    _catwalkPlatform.position = _platformBasePos;
-                    _catwalkPlatform.rotation = _platformBaseRot;
+                    _catwalkPlatform.localPosition = _platformBaseLocalPos;
+                    _catwalkPlatform.localRotation = _platformBaseLocalRot;
                 }
                 return;
             }
@@ -522,16 +541,16 @@ namespace Acrophobia.ProceduralEnvironment
         {
             if (_catwalkPlatform == null) return;
 
-            Vector3 finalPos = _platformBasePos;
+            Vector3 finalPos = _platformBaseLocalPos;
             finalPos.x += swayX;
             finalPos.y += _jerkOffsetY;
             finalPos.z += swayZ;
 
             Quaternion swayRot = Quaternion.Euler(_jerkPitch, 0f, swayRoll + _jerkRoll);
-            Quaternion finalRot = _platformBaseRot * swayRot;
+            Quaternion finalRot = _platformBaseLocalRot * swayRot;
 
-            _catwalkPlatform.position = finalPos;
-            _catwalkPlatform.rotation = finalRot;
+            _catwalkPlatform.localPosition = finalPos;
+            _catwalkPlatform.localRotation = finalRot;
         }
 
         #endregion
@@ -609,7 +628,7 @@ namespace Acrophobia.ProceduralEnvironment
         {
             if (_cornerCablesGroup == null || !_cornerCablesGroup.activeInHierarchy || _cableTransforms == null) return;
 
-            Vector3 center = _catwalkPlatform != null ? _catwalkPlatform.position : _platformBasePos;
+            Vector3 center = _catwalkPlatform != null ? _catwalkPlatform.position : Vector3.zero;
             Vector3 hookWorld = center + _overheadHookOffset;
 
             float halfW = _currentWidth * 0.5f;
@@ -684,15 +703,7 @@ namespace Acrophobia.ProceduralEnvironment
                 _platformFloorCollider = _catwalkPlatform.GetComponent<BoxCollider>();
             }
 
-            if (_catwalkPlatform != null && (_catwalkRenderers == null || _catwalkRenderers.Length == 0))
-            {
-                _catwalkRenderers = _catwalkPlatform.GetComponentsInChildren<MeshRenderer>(true);
-            }
-
-            if (_catwalkRenderers != null && _catwalkRenderers.Length > 0 && _opaqueCatwalkMaterial == null)
-            {
-                _opaqueCatwalkMaterial = _catwalkRenderers[0].sharedMaterial;
-            }
+            EnsureModularCatwalkStructure();
 
 #if UNITY_EDITOR
             if (_glassMaterial == null)
@@ -710,23 +721,130 @@ namespace Acrophobia.ProceduralEnvironment
 #endif
         }
 
+        /// <summary>
+        /// Guarantees that the catwalk has an isolated floor renderer (fades to glass in Tier 5)
+        /// separate from the structural frame and safety railing renderers (which always stay solid opaque steel).
+        /// </summary>
+        private void EnsureModularCatwalkStructure()
+        {
+            if (_catwalkPlatform == null) return;
+
+            Transform walkingSurfaceTrans = null;
+            Transform structureTrans = null;
+            Transform railingsTrans = null;
+
+            foreach (Transform child in _catwalkPlatform.GetComponentsInChildren<Transform>(true))
+            {
+                if (child == _catwalkPlatform) continue;
+
+                if (walkingSurfaceTrans == null &&
+                    (child.name.Equals("WalkingSurface", StringComparison.OrdinalIgnoreCase) ||
+                     child.name.IndexOf("Floor", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    walkingSurfaceTrans = child;
+                }
+                else if (structureTrans == null &&
+                    (child.name.Equals("Structure", StringComparison.OrdinalIgnoreCase) ||
+                     child.name.IndexOf("Frame", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    structureTrans = child;
+                }
+                else if (railingsTrans == null &&
+                    (child.name.Equals("Railings", StringComparison.OrdinalIgnoreCase) ||
+                     child.name.IndexOf("Railing", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    railingsTrans = child;
+                }
+            }
+
+            // If WalkingSurface does not exist yet under _catwalkPlatform, attach the modular deck
+            if (walkingSurfaceTrans == null)
+            {
+#if UNITY_EDITOR
+                if (_modularCatwalkPrefab == null)
+                {
+                    _modularCatwalkPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Acrophobia Exposure Therapy/CatwalkModules/Catwalk_Wide_Rails.prefab");
+                }
+#endif
+                if (_modularCatwalkPrefab != null)
+                {
+                    // Deactivate legacy monolithic LOD meshes so they don't produce ghost meshes
+                    foreach (Transform child in _catwalkPlatform)
+                    {
+                        if (child.name.Contains("LOD") || child.name.Contains("Modular_CatWalk"))
+                        {
+                            child.gameObject.SetActive(false);
+                        }
+                    }
+                    var rootMr = _catwalkPlatform.GetComponent<MeshRenderer>();
+                    if (rootMr != null) rootMr.enabled = false;
+
+                    GameObject modularInstance = Instantiate(_modularCatwalkPrefab, _catwalkPlatform);
+                    modularInstance.name = "Modular_Catwalk_Deck";
+                    modularInstance.transform.localPosition = Vector3.zero;
+                    modularInstance.transform.localRotation = Quaternion.identity;
+                    modularInstance.transform.localScale = Vector3.one;
+
+                    walkingSurfaceTrans = modularInstance.transform.Find("WalkingSurface");
+                    structureTrans = modularInstance.transform.Find("Structure");
+                    railingsTrans = modularInstance.transform.Find("Railings");
+                }
+            }
+
+            if (walkingSurfaceTrans != null)
+            {
+                _floorRenderer = walkingSurfaceTrans.GetComponent<MeshRenderer>();
+            }
+
+            var frameList = new System.Collections.Generic.List<MeshRenderer>();
+            if (structureTrans != null)
+            {
+                var smr = structureTrans.GetComponent<MeshRenderer>();
+                if (smr != null) frameList.Add(smr);
+            }
+            if (railingsTrans != null)
+            {
+                var rmr = railingsTrans.GetComponent<MeshRenderer>();
+                if (rmr != null) frameList.Add(rmr);
+            }
+
+            // Fallback: gather all other active non-floor mesh renderers under platform
+            if (frameList.Count == 0)
+            {
+                foreach (var mr in _catwalkPlatform.GetComponentsInChildren<MeshRenderer>(true))
+                {
+                    if (mr != _floorRenderer && mr.gameObject.activeInHierarchy && mr.enabled)
+                    {
+                        frameList.Add(mr);
+                    }
+                }
+            }
+
+            _frameRenderers = frameList.ToArray();
+
+            if (_opaqueCatwalkMaterial == null && _frameRenderers.Length > 0 && _frameRenderers[0] != null)
+            {
+                _opaqueCatwalkMaterial = _frameRenderers[0].sharedMaterial;
+            }
+        }
+
         private void InitializeBaselines()
         {
             if (_catwalkPlatform != null)
             {
-                _platformBasePos = _catwalkPlatform.position;
-                _platformBaseRot = _catwalkPlatform.rotation;
+                _platformBaseLocalPos = _catwalkPlatform.localPosition;
+                _platformBaseLocalRot = _catwalkPlatform.localRotation;
             }
             else
             {
-                _platformBasePos = new Vector3(-13.00f, 104.17f, -12.00f);
-                _platformBaseRot = Quaternion.identity;
+                _platformBaseLocalPos = new Vector3(-13.00f, 104.17f, -12.00f);
+                _platformBaseLocalRot = Quaternion.identity;
             }
 
             if (_frontRailing != null)
             {
-                _frontRailingRaisedPos = new Vector3(_platformBasePos.x, 104.17f, -8.00f);
-                _frontRailingLoweredPos = new Vector3(_platformBasePos.x, 102.80f, -8.00f); // 1.37m below deck
+                _frontRailingRaisedLocalPos = _frontRailing.localPosition;
+                _frontRailingLoweredLocalPos = _frontRailingRaisedLocalPos - new Vector3(0f, 1.37f, 0f); // 1.37m below deck
             }
         }
 

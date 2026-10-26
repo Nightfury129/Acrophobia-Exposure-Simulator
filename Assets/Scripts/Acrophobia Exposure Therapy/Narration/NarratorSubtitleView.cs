@@ -60,17 +60,11 @@ namespace Acrophobia.Narration
 
         public void Show(string line)
         {
-            EnsureUIHierarchy();
-
+            // Narrator removed per user request: keep subtitles completely hidden
             _pending = line;
-            if (_text != null) _text.text = line;
-            _targetAlpha = 1f;
-
-            // Snap into place the first time so a line never drifts in from nowhere.
-            if (_group != null && _group.alpha <= 0.01f)
-            {
-                SnapToView();
-            }
+            _targetAlpha = 0f;
+            if (_group != null) _group.alpha = 0f;
+            if (_canvas != null) _canvas.enabled = false;
         }
 
         public void Hide()
