@@ -49,6 +49,7 @@ namespace Acrophobia.Locomotion
         [Header("References")]
         [SerializeField] private Transform _centerEyeAnchor;
         [SerializeField] private CharacterController _characterController;
+        [SerializeField] private Telemetry.SudsPromptController _suds;
 
         private bool _snapTurnDebounce;
 
@@ -76,6 +77,11 @@ namespace Acrophobia.Locomotion
                 _characterController = GetComponent<CharacterController>();
             }
 
+            if (_suds == null)
+            {
+                _suds = FindAnyObjectByType<Telemetry.SudsPromptController>();
+            }
+
             if (_centerEyeAnchor == null)
             {
                 Transform found = transform.Find("TrackingSpace/CenterEyeAnchor");
@@ -97,6 +103,13 @@ namespace Acrophobia.Locomotion
             {
                 ResolveReferences();
                 if (_centerEyeAnchor == null || _characterController == null) return;
+            }
+
+            // Pause locomotion when the SUDS distress rating prompt is open
+            // so thumbstick input goes to dialing the distress value instead of moving.
+            if (_suds != null && _suds.IsOpen)
+            {
+                return;
             }
 
             if (_enableTurning)

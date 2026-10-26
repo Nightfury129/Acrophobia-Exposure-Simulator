@@ -335,11 +335,16 @@ namespace Acrophobia.Telemetry
 
             try
             {
+                // Support both Primary (Left) and Secondary (Right) thumbsticks.
+                // Both Horizontal (X) and Vertical (Y) work:
+                // Right or Up increases (+), Left or Down decreases (-).
                 Vector2 stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
-                if (Mathf.Abs(stick.x) > Mathf.Abs(axis)) axis = stick.x;
+                float val1 = Mathf.Abs(stick.x) > Mathf.Abs(stick.y) ? stick.x : stick.y;
+                if (Mathf.Abs(val1) > Mathf.Abs(axis)) axis = val1;
 
                 Vector2 secondary = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
-                if (Mathf.Abs(secondary.x) > Mathf.Abs(axis)) axis = secondary.x;
+                float val2 = Mathf.Abs(secondary.x) > Mathf.Abs(secondary.y) ? secondary.x : secondary.y;
+                if (Mathf.Abs(val2) > Mathf.Abs(axis)) axis = val2;
             }
             catch (Exception) { }
 
@@ -349,8 +354,8 @@ namespace Acrophobia.Telemetry
                 var kb = UnityEngine.InputSystem.Keyboard.current;
                 if (kb != null)
                 {
-                    if (kb.rightArrowKey.isPressed || kb.dKey.isPressed) axis = 1f;
-                    else if (kb.leftArrowKey.isPressed || kb.aKey.isPressed) axis = -1f;
+                    if (kb.rightArrowKey.isPressed || kb.dKey.isPressed || kb.upArrowKey.isPressed || kb.wKey.isPressed) axis = 1f;
+                    else if (kb.leftArrowKey.isPressed || kb.aKey.isPressed || kb.downArrowKey.isPressed || kb.sKey.isPressed) axis = -1f;
                 }
             }
             catch (Exception) { }
@@ -359,8 +364,8 @@ namespace Acrophobia.Telemetry
 #if ENABLE_LEGACY_INPUT_MANAGER
             try
             {
-                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) axis = 1f;
-                else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) axis = -1f;
+                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)) axis = 1f;
+                else if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)) axis = -1f;
             }
             catch (Exception) { }
 #endif
