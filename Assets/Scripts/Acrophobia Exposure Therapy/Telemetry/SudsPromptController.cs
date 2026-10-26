@@ -79,6 +79,7 @@ namespace Acrophobia.Telemetry
         private float _heldDirection;
         private float _heldTimer;
         private float _nextRepeatAt;
+        private int _lastSubmittedValue = -1;
 
         private static readonly Color ColorPanel = new Color(0.08f, 0.10f, 0.14f, 0.92f);
         private static readonly Color ColorAccent = new Color(0.00f, 0.82f, 0.83f, 1f);
@@ -136,7 +137,9 @@ namespace Acrophobia.Telemetry
             EnsureUIHierarchy();
 
             _context = string.IsNullOrEmpty(context) ? "unspecified" : context;
-            _currentValue = Mathf.Clamp(_initialValue, ScaleMinimum, ScaleMaximum);
+            _currentValue = _lastSubmittedValue >= 0
+                ? _lastSubmittedValue
+                : Mathf.Clamp(_initialValue, ScaleMinimum, ScaleMaximum);
             _isOpen = true;
             _openSince = Time.time;
             _heldDirection = 0f;
@@ -177,6 +180,7 @@ namespace Acrophobia.Telemetry
             }
 
             int value = Mathf.Clamp(_currentValue, ScaleMinimum, ScaleMaximum);
+            _lastSubmittedValue = value;
 
             _isOpen = false;
             ApplyVisibility(false);
@@ -195,6 +199,11 @@ namespace Acrophobia.Telemetry
         {
             if (!_isOpen)
             {
+                // Allow the participant to manually open the SUDS prompt anytime
+                if (WasOpenRequested())
+                {
+                    Show("on_demand");
+                }
                 return;
             }
 
@@ -422,7 +431,8 @@ namespace Acrophobia.Telemetry
             try
             {
                 if (OVRInput.GetDown(OVRInput.Button.Two) ||
-                    OVRInput.GetDown(OVRInput.Button.Four))
+                    OVRInput.GetDown(OVRInput.Button.Four) ||
+                    OVRInput.GetDown(OVRInput.Button.Three)) // X button also toggles close
                 {
                     return true;
                 }
@@ -433,7 +443,7 @@ namespace Acrophobia.Telemetry
             try
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
-                if (kb != null && kb.escapeKey.wasPressedThisFrame)
+                if (kb != null && (kb.escapeKey.wasPressedThisFrame || kb.uKey.wasPressedThisFrame))
                 {
                     return true;
                 }
@@ -444,7 +454,45 @@ namespace Acrophobia.Telemetry
 #if ENABLE_LEGACY_INPUT_MANAGER
             try
             {
-                if (Input.GetKeyDown(KeyCode.Escape))
+                if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.U))
+                {
+                    return true;
+                }
+            }
+            catch (Exception) { }
+#endif
+
+            return false;
+        }
+
+        private bool WasOpenRequested()
+        {
+            try
+            {
+                // VR: X button on Left Touch controller
+                if (OVRInput.GetDown(OVRInput.Button.Three))
+                {
+                    return true;
+                }
+            }
+            catch (Exception) { }
+
+#if ENABLE_INPUT_SYSTEM
+            try
+            {
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null && (kb.uKey.wasPressedThisFrame || kb.tabKey.wasPressedThisFrame))
+                {
+                    return true;
+                }
+            }
+            catch (Exception) { }
+#endif
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetKeyDown(KeyCode.U) || Input.GetKeyDown(KeyCode.Tab))
                 {
                     return true;
                 }
@@ -544,9 +592,9 @@ namespace Acrophobia.Telemetry
                 new Vector2(250f, -74f), new Vector2(260f, 34f), TextAlignmentOptions.Right);
 
             _hintText = EnsureText("HintText",
-                "Thumbstick or arrows to set     A / Enter to confirm     B / Esc to skip",
-                24f, FontStyles.Normal, ColorMuted,
-                new Vector2(0f, -124f), new Vector2(720f, 34f), TextAlignmentOptions.Center);
+                "Thumbstick/Arrows: set     A/Enter: confirm     B/Esc: skip     X/U: open anytime",
+                22f, FontStyles.Normal, ColorMuted,
+                new Vector2(0f, -124f), new Vector2(740f, 34f), TextAlignmentOptions.Center);
         }
 
         private void EnsureScaleBar()
