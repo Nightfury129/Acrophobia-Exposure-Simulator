@@ -249,7 +249,7 @@ namespace Acrophobia.AdaptiveFSM
         private void UpdateAwaitingStart()
         {
             // If the user presses space, enter, or VR button, start the session
-            bool startPressed = Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return);
+            bool startPressed = false;
 #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Keyboard.current != null &&
                 (UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame ||
@@ -257,6 +257,15 @@ namespace Acrophobia.AdaptiveFSM
             {
                 startPressed = true;
             }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            try
+            {
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+                {
+                    startPressed = true;
+                }
+            }
+            catch (Exception) { }
 #endif
             try
             {

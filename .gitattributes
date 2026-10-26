@@ -22,3 +22,6 @@ Assets/Audio/** !filter !diff !merge
 # PolyHaven textures live beside the scene that uses them and are small (~21 MB).
 # GitHub refuses new LFS objects on a public fork, so these stay plain blobs.
 Assets/Scenes/**/Textures/PolyHaven/** !filter !diff !merge
+
+# vrbn_studios textures: committed as plain blobs to avoid LFS quota blocks
+Assets/vrbn_studios/** !filter !diff !merge
