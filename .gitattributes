@@ -11,17 +11,14 @@
 *.mp4 -delta
 *.psd filter=lfs diff=lfs merge=lfs -text
 *.hdr filter=lfs diff=lfs merge=lfs -text
-
 # Poly Haven source textures are small (~15 MB total) and do not need LFS.
 # GitHub refuses new LFS objects on a public fork, so these are plain blobs.
 Assets/Textures/** !filter !diff !merge
-
 # Ritual audio: ~25 MB total, and GitHub refuses new LFS objects on a public fork.
 Assets/Audio/** !filter !diff !merge
-
 # PolyHaven textures live beside the scene that uses them and are small (~21 MB).
 # GitHub refuses new LFS objects on a public fork, so these stay plain blobs.
 Assets/Scenes/**/Textures/PolyHaven/** !filter !diff !merge
-
 # vrbn_studios textures: committed as plain blobs to avoid LFS quota blocks
 Assets/vrbn_studios/** !filter !diff !merge
+*.apk filter=lfs diff=lfs merge=lfs -text
