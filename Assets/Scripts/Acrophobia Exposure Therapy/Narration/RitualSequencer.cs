@@ -126,6 +126,7 @@ namespace Acrophobia.Narration
         [SerializeField] private AdaptiveExposureFSM _fsm;
         [SerializeField] private SessionTelemetryLogger _logger;
         [SerializeField] private TeleportLocomotion _teleport;
+        [SerializeField] private Locomotion.JoystickLocomotion _joystick;
 
         private Coroutine _running;
         private int _runningTier = -1;
@@ -169,12 +170,14 @@ namespace Acrophobia.Narration
         {
             if (_fsm == null) _fsm = FindAnyObjectByType<AdaptiveExposureFSM>();
             if (_teleport == null) _teleport = FindAnyObjectByType<TeleportLocomotion>();
+            if (_joystick == null) _joystick = FindAnyObjectByType<Locomotion.JoystickLocomotion>();
             if (_logger == null) _logger = FindAnyObjectByType<SessionTelemetryLogger>();
             if (_subtitles == null) _subtitles = FindAnyObjectByType<NarratorSubtitleView>();
 
             // Same rig ExposureHeightController drives, so a placement and a tier offset
             // never disagree about what "the player" is.
             if (_playerRig == null && _teleport != null) _playerRig = _teleport.transform;
+            if (_playerRig == null && _joystick != null) _playerRig = _joystick.transform;
 
             if (_fader == null)
             {
@@ -222,6 +225,7 @@ namespace Acrophobia.Narration
 
             // A skip can land mid-locked-beat, so movement is restored unconditionally.
             if (_teleport != null) _teleport.enabled = true;
+            if (_joystick != null) _joystick.EnableMovement = true;
 
             _logger?.RecordEvent("ritual_skipped", _runningTier, "participant_or_system", 0f);
             _runningTier = -1;
@@ -291,10 +295,12 @@ namespace Acrophobia.Narration
             // Only deliberate travel is withheld: looking around still works, and the
             // step-back and end-session controls stay live throughout, which the brief
             // requires unconditionally.
-            bool lockedHere = beat.LockMovement && _teleport != null && _teleport.enabled;
+            bool lockedHere = beat.LockMovement &&
+                ((_teleport != null && _teleport.enabled) || (_joystick != null && _joystick.EnableMovement));
             if (lockedHere)
             {
-                _teleport.enabled = false;
+                if (_teleport != null) _teleport.enabled = false;
+                if (_joystick != null) _joystick.EnableMovement = false;
                 _logger?.RecordEvent("movement_locked", _runningTier, "ritual_beat", 0f);
             }
 
@@ -426,7 +432,8 @@ namespace Acrophobia.Narration
 
             if (lockedHere)
             {
-                _teleport.enabled = true;
+                if (_teleport != null) _teleport.enabled = true;
+                if (_joystick != null) _joystick.EnableMovement = true;
                 _logger?.RecordEvent("movement_unlocked", _runningTier, "ritual_beat", 0f);
             }
         }
@@ -570,7 +577,16 @@ namespace Acrophobia.Narration
 
             Vector3 placed = _playerRig.position + delta;
             placed.y = marker.position.y;                   // rig root sits at floor level
+
+            CharacterController cc = _playerRig.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+
             _playerRig.position = placed;
+
+            if (cc != null) cc.enabled = true;
+
+            var ground = _playerRig.GetComponent<Locomotion.PlayerGroundingController>();
+            if (ground != null) ground.ResetSafePosition();
 
             _logger?.RecordEvent("rig_placed", _runningTier, marker.name, 0f);
         }

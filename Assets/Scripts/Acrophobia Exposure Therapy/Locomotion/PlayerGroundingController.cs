@@ -31,7 +31,7 @@ namespace Acrophobia.Locomotion
     public class PlayerGroundingController : MonoBehaviour
     {
         [Tooltip("Maximum ground search distance beneath the tracked feet.")]
-        [SerializeField, Range(0.1f, 2f)] private float _groundCheckDistance = 0.6f;
+        [SerializeField, Range(0.1f, 2f)] private float _groundCheckDistance = 1.2f;
 
         [Tooltip("Radius of the sphere cast used to find ground under the feet.")]
         [SerializeField, Range(0.05f, 0.5f)] private float _groundProbeRadius = 0.20f;
@@ -159,12 +159,45 @@ namespace Acrophobia.Locomotion
         /// and stepping through walls still worked. PlayerGravityFall did this sync and
         /// it was lost when that component was replaced.
         /// </summary>
+        /// <summary>
+        /// Offsets the safe head position when artificial locomotion moves the rig,
+        /// preventing edge containment from treating artificial travel as room-scale overshoot.
+        /// </summary>
+        public void NotifyRigMoved(Vector3 delta)
+        {
+            if (_hasSafePosition)
+            {
+                _lastSafeHeadPosition += delta;
+            }
+        }
+
+        /// <summary>
+        /// Resets the safe head position and clears containment debouncing when the participant
+        /// is relocated to a new level or spawn anchor.
+        /// </summary>
+        public void ResetSafePosition()
+        {
+            if (_centerEyeAnchor != null)
+            {
+                _lastSafeHeadPosition = _centerEyeAnchor.position;
+            }
+            else
+            {
+                _lastSafeHeadPosition = transform.position;
+            }
+            _hasSafePosition = true;
+            _framesWithoutFloor = 0;
+            _containmentEngaged = false;
+        }
+
         private void SyncCapsuleToHead()
         {
             if (_characterController == null || _centerEyeAnchor == null) return;
 
             Vector3 headLocal = transform.InverseTransformPoint(_centerEyeAnchor.position);
-            _characterController.center = new Vector3(headLocal.x, 0.9f, headLocal.z);
+            float headHeight = Mathf.Clamp(headLocal.y, 0.5f, 2.2f);
+            _characterController.height = headHeight;
+            _characterController.center = new Vector3(headLocal.x, headHeight * 0.5f, headLocal.z);
         }
 
         /// <summary>

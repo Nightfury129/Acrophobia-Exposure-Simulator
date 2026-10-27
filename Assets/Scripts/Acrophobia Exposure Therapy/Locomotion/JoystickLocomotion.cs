@@ -49,6 +49,7 @@ namespace Acrophobia.Locomotion
         [Header("References")]
         [SerializeField] private Transform _centerEyeAnchor;
         [SerializeField] private CharacterController _characterController;
+        [SerializeField] private PlayerGroundingController _groundingController;
         [SerializeField] private Telemetry.SudsPromptController _suds;
 
         private bool _snapTurnDebounce;
@@ -75,6 +76,11 @@ namespace Acrophobia.Locomotion
             if (_characterController == null)
             {
                 _characterController = GetComponent<CharacterController>();
+            }
+
+            if (_groundingController == null)
+            {
+                _groundingController = GetComponent<PlayerGroundingController>();
             }
 
             if (_suds == null)
@@ -151,13 +157,28 @@ namespace Acrophobia.Locomotion
 
             Vector3 motion = moveDir * (speed * Time.deltaTime);
 
-            if (_characterController.enabled)
+            if (_characterController != null && _characterController.enabled)
             {
-                _characterController.Move(motion);
+                Vector3 step = motion;
+                step.y -= 0.5f * Time.deltaTime;
+                Vector3 before = transform.position;
+                _characterController.Move(step);
+
+                Vector3 delta = transform.position - before;
+                delta.y = 0f;
+                // If CharacterController caught on floor collider seams, apply direct motion fallback
+                if (delta.sqrMagnitude < (motion.sqrMagnitude * 0.05f))
+                {
+                    transform.position = before + motion;
+                    delta = motion;
+                }
+
+                _groundingController?.NotifyRigMoved(delta);
             }
             else
             {
                 transform.position += motion;
+                _groundingController?.NotifyRigMoved(motion);
             }
         }
 
@@ -215,12 +236,33 @@ namespace Acrophobia.Locomotion
         {
             Vector2 stick = Vector2.zero;
 
-            // 1. Primary Thumbstick (Left stick on Oculus Touch)
+            // 1. Right Thumbstick (Move forward/back/strafe)
             try
             {
-                stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+                stick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
+                if (stick.sqrMagnitude < 0.001f)
+                {
+                    stick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch);
+                }
             }
             catch (Exception) { }
+
+            // 1b. UnityEngine.XR CommonUsages fallback (Right controller)
+            if (stick.sqrMagnitude < 0.001f)
+            {
+                try
+                {
+                    var rightDevices = new System.Collections.Generic.List<UnityEngine.XR.InputDevice>();
+                    UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(
+                        UnityEngine.XR.InputDeviceCharacteristics.Right | UnityEngine.XR.InputDeviceCharacteristics.Controller,
+                        rightDevices);
+                    if (rightDevices.Count > 0 && rightDevices[0].TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 axis))
+                    {
+                        stick = axis;
+                    }
+                }
+                catch (Exception) { }
+            }
 
             // 2. Keyboard fallback / Meta XR Simulator WASD & Arrows
 #if ENABLE_INPUT_SYSTEM
@@ -256,12 +298,33 @@ namespace Acrophobia.Locomotion
         {
             float turn = 0f;
 
-            // 1. Secondary Thumbstick (Right stick on Oculus Touch)
+            // 1. Left Thumbstick (Turn / look around left & right)
             try
             {
-                turn = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick).x;
+                turn = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick).x;
+                if (Mathf.Abs(turn) < 0.001f)
+                {
+                    turn = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch).x;
+                }
             }
             catch (Exception) { }
+
+            // 1b. UnityEngine.XR CommonUsages fallback (Left controller)
+            if (Mathf.Abs(turn) < 0.001f)
+            {
+                try
+                {
+                    var leftDevices = new System.Collections.Generic.List<UnityEngine.XR.InputDevice>();
+                    UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(
+                        UnityEngine.XR.InputDeviceCharacteristics.Left | UnityEngine.XR.InputDeviceCharacteristics.Controller,
+                        leftDevices);
+                    if (leftDevices.Count > 0 && leftDevices[0].TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out Vector2 axis))
+                    {
+                        turn = axis.x;
+                    }
+                }
+                catch (Exception) { }
+            }
 
             // 2. Keyboard turn fallback (Q / E keys)
 #if ENABLE_INPUT_SYSTEM
@@ -293,7 +356,11 @@ namespace Acrophobia.Locomotion
         {
             try
             {
-                if (OVRInput.Get(OVRInput.Button.PrimaryThumbstick)) return true;
+                if (OVRInput.Get(OVRInput.Button.SecondaryThumbstick) ||
+                    OVRInput.Get(OVRInput.Button.PrimaryThumbstick))
+                {
+                    return true;
+                }
             }
             catch (Exception) { }
 

@@ -154,15 +154,10 @@ namespace Acrophobia.ProceduralEnvironment
             tier = Mathf.Clamp(tier, 1, 5);
             _currentTier = tier;
 
-            // The catwalk has been replaced by a per-tier outdoor space, so this object
-            // is normally inactive. The FSM still calls SetTier on every tier change,
-            // and the railing, width and glass animators below all StartCoroutine -
-            // which throws on an inactive GameObject, once per call. Record the tier so
-            // the state stays truthful if the catwalk is ever switched back on, then
-            // leave the animation alone.
+            // Ensure the catwalk GameObject is active so colliders, crane cables, and glass floor work
             if (!gameObject.activeInHierarchy)
             {
-                return;
+                gameObject.SetActive(true);
             }
 
             ResolveReferences();
@@ -736,8 +731,9 @@ namespace Acrophobia.ProceduralEnvironment
 
             if (_frontRailing != null)
             {
-                _frontRailingRaisedPos = new Vector3(_platformBasePos.x, 104.17f, -8.00f);
-                _frontRailingLoweredPos = new Vector3(_platformBasePos.x, 102.80f, -8.00f); // 1.37m below deck
+                // Placed at the front ledge of the catwalk (z = -14.00f) facing the drop, NOT inside the apartment room (z = -8.00f)
+                _frontRailingRaisedPos = new Vector3(_platformBasePos.x, 104.17f, -14.00f);
+                _frontRailingLoweredPos = new Vector3(_platformBasePos.x, 102.80f, -14.00f); // 1.37m below deck
             }
         }
 

@@ -207,9 +207,17 @@ namespace Acrophobia.ProceduralEnvironment
 
             if (_playerRig != null)
             {
+                CharacterController cc = _playerRig.GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+
                 Vector3 r = _rigOrigin;
                 r.y = _rigOrigin.y + offset;
                 _playerRig.position = r;
+
+                if (cc != null) cc.enabled = true;
+
+                var ground = _playerRig.GetComponent<PlayerGroundingController>();
+                if (ground != null) ground.ResetSafePosition();
             }
 
             // Tiers 1-4 are balconies off the apartment, which is the constant safe base
