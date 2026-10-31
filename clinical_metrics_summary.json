@@ -1,0 +1,57 @@
+{
+  "total_duration_s": 237.97,
+  "total_samples": 2355,
+  "effective_sample_rate_hz": 9.9,
+  "max_height_m": 105.74,
+  "peak_tremor": 1.0,
+  "mean_tremor": 0.5315,
+  "mean_gaze_avoidance": 0.5495,
+  "total_tiers_reached": 5,
+  "tiers": {
+    "1": {
+      "samples": 994,
+      "max_height_m": 13.5,
+      "mean_tremor": 0.477,
+      "peak_tremor": 1.0,
+      "mean_gaze_avoidance": 0.4054,
+      "downward_gaze_pct": 0.5,
+      "postural_freeze_pct": 16.4
+    },
+    "2": {
+      "samples": 25,
+      "max_height_m": 31.53,
+      "mean_tremor": 0.9704,
+      "peak_tremor": 1.0,
+      "mean_gaze_avoidance": 0.32,
+      "downward_gaze_pct": 0.0,
+      "postural_freeze_pct": 0.0
+    },
+    "3": {
+      "samples": 20,
+      "max_height_m": 61.53,
+      "mean_tremor": 0.9523,
+      "peak_tremor": 1.0,
+      "mean_gaze_avoidance": 0.6,
+      "downward_gaze_pct": 0.0,
+      "postural_freeze_pct": 0.0
+    },
+    "4": {
+      "samples": 80,
+      "max_height_m": 105.54,
+      "mean_tremor": 0.7398,
+      "peak_tremor": 1.0,
+      "mean_gaze_avoidance": 0.5989,
+      "downward_gaze_pct": 8.8,
+      "postural_freeze_pct": 0.0
+    },
+    "5": {
+      "samples": 1236,
+      "max_height_m": 105.74,
+      "mean_tremor": 0.5461,
+      "peak_tremor": 1.0,
+      "mean_gaze_avoidance": 0.666,
+      "downward_gaze_pct": 27.8,
+      "postural_freeze_pct": 11.2
+    }
+  }
+}

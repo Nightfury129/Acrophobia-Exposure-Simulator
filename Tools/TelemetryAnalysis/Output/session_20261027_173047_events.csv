@@ -1,0 +1,9 @@
+t_seconds,event_type,tier,detail,value
+0.000,session_start,1,session_id,0.0000
+1.050,narrator_line,1,wake,0.0000
+1.050,ritual_started,1,Bedroom morning,0.0000
+1.134,high_arousal_support_offered,1,no_tier_change,0.0000
+1.899,rig_placed,1,Spawn_1_Bedroom,0.0000
+2.484,eye_height_calibrated,1,metres,1.9134
+2.484,eye_height_spread,0,metres,0.0066
+6.285,high_arousal_support_offered,1,no_tier_change,0.0000

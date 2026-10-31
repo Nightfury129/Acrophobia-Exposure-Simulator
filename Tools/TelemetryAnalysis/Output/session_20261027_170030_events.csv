@@ -1,0 +1,45 @@
+t_seconds,event_type,tier,detail,value
+0.000,session_start,1,session_id,0.0000
+0.994,narrator_line,1,wake,0.0000
+0.994,ritual_started,1,Bedroom morning,0.0000
+1.092,high_arousal_support_offered,1,no_tier_change,0.0000
+1.774,rig_placed,1,Spawn_1_Bedroom,0.0000
+2.456,eye_height_calibrated,1,metres,1.5002
+2.456,eye_height_spread,0,metres,0.0593
+7.107,high_arousal_support_offered,1,no_tier_change,0.0000
+11.298,high_arousal_support_offered,1,no_tier_change,0.0000
+12.036,high_arousal_support_offered,1,no_tier_change,0.0000
+12.189,suds_dismissed,0,baseline,0.0000
+13.024,high_arousal_support_offered,1,no_tier_change,0.0000
+13.024,narrator_line,1,avoid,0.0000
+28.452,ritual_point_clicked,1,Exit_Point,10.2198
+28.452,ritual_completed,1,Bedroom morning,0.0000
+28.925,tier_advanced,2,tier_entered,2.0000
+28.925,ritual_started,2,Office morning,0.0000
+28.953,narrator_line,2,tier2,0.0000
+29.050,tier_height_applied,2,metres,12.0000
+29.078,high_arousal_support_offered,2,no_tier_change,0.0000
+29.788,rig_placed,2,Spawn_Anchor,0.0000
+38.797,suds_dismissed,0,tier_entry,0.0000
+39.381,tier_height_applied,1,metres,3.0000
+39.395,high_arousal_support_offered,1,no_tier_change,0.0000
+40.983,narrator_line,1,step_back,0.0000
+46.204,high_arousal_support_offered,1,no_tier_change,0.0000
+54.586,high_arousal_support_offered,1,no_tier_change,0.0000
+58.333,narrator_line,1,first_down,0.0000
+68.318,suds_no_response,0,after_step_back,0.0000
+82.283,high_arousal_support_offered,1,no_tier_change,0.0000
+86.836,high_arousal_support_offered,1,no_tier_change,0.0000
+87.950,high_arousal_support_offered,1,no_tier_change,0.0000
+96.248,high_arousal_support_offered,1,no_tier_change,0.0000
+106.566,high_arousal_support_offered,1,no_tier_change,0.0000
+107.234,high_arousal_support_offered,1,no_tier_change,0.0000
+110.353,max_height_reached,1,metres,13.5370
+110.353,max_distance_from_start,1,metres,139.4432
+110.353,downward_gaze_total,1,seconds,9.8822
+110.353,retreat_event_total,1,count,0.0000
+110.353,suds_response_total,1,count,0.0000
+110.353,samples_written,1,count,1098.0000
+110.353,dwell_tier_1,1,seconds,100.0497
+110.353,dwell_tier_2,2,seconds,10.3313
+110.353,session_end,1,application_quit,110.3530

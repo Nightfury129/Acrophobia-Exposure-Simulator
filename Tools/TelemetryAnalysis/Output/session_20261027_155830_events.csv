@@ -1,0 +1,63 @@
+t_seconds,event_type,tier,detail,value
+0.000,session_start,1,session_id,0.0000
+0.980,narrator_line,1,wake,0.0000
+0.980,ritual_started,1,Bedroom morning,0.0000
+1.064,high_arousal_support_offered,1,no_tier_change,0.0000
+1.788,rig_placed,1,Spawn_1_Bedroom,0.0000
+2.415,eye_height_calibrated,1,metres,1.4853
+2.415,eye_height_spread,0,metres,0.0115
+6.926,high_arousal_support_offered,1,no_tier_change,0.0000
+10.602,high_arousal_support_offered,1,no_tier_change,0.0000
+13.010,narrator_line,1,avoid,0.0000
+17.647,suds_dismissed,0,baseline,0.0000
+18.747,high_arousal_support_offered,1,no_tier_change,0.0000
+21.448,high_arousal_support_offered,1,no_tier_change,0.0000
+26.544,high_arousal_support_offered,1,no_tier_change,0.0000
+35.942,high_arousal_support_offered,1,no_tier_change,0.0000
+38.741,high_arousal_support_offered,1,no_tier_change,0.0000
+45.939,high_arousal_support_offered,1,no_tier_change,0.0000
+49.295,tier_advanced,2,tier_entered,2.0000
+49.295,ritual_started,2,Office morning,0.0000
+49.337,narrator_line,2,tier2,0.0000
+49.406,tier_height_applied,2,metres,12.0000
+49.448,high_arousal_support_offered,2,no_tier_change,0.0000
+50.103,rig_placed,2,Spawn_Anchor,0.0000
+56.869,high_arousal_support_offered,2,no_tier_change,0.0000
+57.329,high_arousal_support_offered,2,no_tier_change,0.0000
+57.538,high_arousal_support_offered,2,no_tier_change,0.0000
+61.367,narrator_line,2,first_down,0.0000
+63.942,suds_dismissed,0,tier_entry,0.0000
+64.555,tier_height_applied,1,metres,3.0000
+64.583,high_arousal_support_offered,1,no_tier_change,0.0000
+70.667,high_arousal_support_offered,1,no_tier_change,0.0000
+71.698,high_arousal_support_offered,1,no_tier_change,0.0000
+73.396,narrator_line,1,step_back,0.0000
+87.069,suds_dismissed,0,after_step_back,0.0000
+88.838,tier_advanced,2,tier_entered,2.0000
+88.838,ritual_started,2,Office morning,0.0000
+88.977,tier_height_applied,2,metres,12.0000
+89.019,high_arousal_support_offered,2,no_tier_change,0.0000
+89.617,rig_placed,2,Spawn_Anchor,0.0000
+97.679,high_arousal_support_offered,2,no_tier_change,0.0000
+100.770,suds_dismissed,0,tier_entry,0.0000
+101.285,narrator_line,1,step_back,0.0000
+101.397,tier_height_applied,1,metres,3.0000
+101.438,high_arousal_support_offered,1,no_tier_change,0.0000
+105.629,suds_response,1,after_step_back,0.0000
+105.741,tier_advanced,2,tier_entered,2.0000
+105.741,ritual_started,2,Office morning,0.0000
+105.866,tier_height_applied,2,metres,12.0000
+105.894,high_arousal_support_offered,2,no_tier_change,0.0000
+106.395,tier_advanced,3,tier_entered,3.0000
+106.395,ritual_started,3,Plant room,0.0000
+106.520,tier_height_applied,3,metres,30.0000
+107.258,rig_placed,3,Spawn_Anchor,0.0000
+113.941,high_arousal_support_offered,3,no_tier_change,0.0000
+115.055,high_arousal_support_offered,3,no_tier_change,0.0000
+115.222,high_arousal_support_offered,3,no_tier_change,0.0000
+116.322,high_arousal_support_offered,3,no_tier_change,0.0000
+118.369,narrator_line,3,tier3,0.0000
+125.568,suds_dismissed,0,tier_entry,0.0000
+126.222,tier_height_applied,2,metres,12.0000
+126.264,high_arousal_support_offered,2,no_tier_change,0.0000
+133.949,high_arousal_support_offered,2,no_tier_change,0.0000
